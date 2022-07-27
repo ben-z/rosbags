@@ -42,7 +42,7 @@ def test_cliwrapper(tmp_path: Path) -> None:
     with patch('rosbags.convert.__main__.convert') as cvrt, \
          patch.object(sys, 'argv', ['cvt', str(tmp_path / 'ros1.bag')]):
         main()
-    cvrt.assert_called_with(tmp_path / 'ros1.bag', None)
+    cvrt.assert_called_with(src=tmp_path / 'ros1.bag', dst=None, exclude_topics=[])
 
     with patch('rosbags.convert.__main__.convert') as cvrt, \
          patch.object(sys, 'argv', ['cvt',
@@ -68,7 +68,7 @@ def test_cliwrapper(tmp_path: Path) -> None:
                                     '--dst',
                                     str(tmp_path / 'target')]):
         main()
-    cvrt.assert_called_with(tmp_path / 'ros1.bag', tmp_path / 'target')
+    cvrt.assert_called_with(src=tmp_path / 'ros1.bag', dst=tmp_path / 'target', exclude_topics=[])
 
     with patch.object(sys, 'argv', ['cvt', str(tmp_path / 'ros1.bag')]), \
          patch('builtins.print') as mock_print, \
@@ -80,7 +80,7 @@ def test_cliwrapper(tmp_path: Path) -> None:
     with patch('rosbags.convert.__main__.convert') as cvrt, \
          patch.object(sys, 'argv', ['cvt', str(tmp_path / 'subdir')]):
         main()
-    cvrt.assert_called_with(tmp_path / 'subdir', None)
+    cvrt.assert_called_with(src=tmp_path / 'subdir', dst=None, exclude_topics=[])
 
     with patch('rosbags.convert.__main__.convert') as cvrt, \
          patch.object(sys, 'argv', ['cvt',
@@ -97,7 +97,7 @@ def test_cliwrapper(tmp_path: Path) -> None:
                                     '--dst',
                                     str(tmp_path / 'target.bag')]):
         main()
-    cvrt.assert_called_with(tmp_path / 'subdir', tmp_path / 'target.bag')
+    cvrt.assert_called_with(src=tmp_path / 'subdir', dst=tmp_path / 'target.bag', exclude_topics=[])
 
     with patch.object(sys, 'argv', ['cvt', str(tmp_path / 'subdir')]), \
          patch('builtins.print') as mock_print, \
@@ -105,6 +105,14 @@ def test_cliwrapper(tmp_path: Path) -> None:
          pytest.raises(SystemExit):
         main()
     mock_print.assert_called_with('ERROR: exc')
+
+    with patch('rosbags.convert.__main__.convert') as cvrt, \
+         patch.object(sys, 'argv', ['cvt',
+                                    str(tmp_path / 'ros1.bag'),
+                                    '--exclude-topic',
+                                    '/foo']):
+        main()
+    cvrt.assert_called_with(src=tmp_path / 'ros1.bag', dst=None, exclude_topics=['/foo'])
 
 
 def test_convert_1to2(tmp_path: Path) -> None:
@@ -176,7 +184,7 @@ def test_convert_1to2(tmp_path: Path) -> None:
         convert(Path('foo.bag'), None)
 
         reader.assert_called_with(Path('foo.bag'))
-        readerinst.messages.assert_called_with()
+        readerinst.messages.assert_called_with(connections=readerinst.connections)
 
         writer.assert_called_with(Path('foo'))
         writerinst.add_connection.assert_has_calls(
@@ -204,6 +212,9 @@ def test_convert_1to2(tmp_path: Path) -> None:
                 call(b'\x45', 'typ'),
             ],
         )
+
+        with pytest.raises(ConverterError, match='No connections left for conversion'):
+            convert(Path('foo.bag'), None, ['/topic', '/other'])
 
         writerinst.connections.clear()
         ros1_to_cdr.side_effect = KeyError('exc')
@@ -340,7 +351,9 @@ def test_convert_2to1(tmp_path: Path) -> None:
         convert(Path('foo'), None)
 
         reader.assert_called_with(Path('foo'))
-        reader.return_value.__enter__.return_value.messages.assert_called_with()
+        reader.return_value.__enter__.return_value.messages.assert_called_with(
+            connections=readerinst.connections,
+        )
 
         writer.assert_called_with(Path('foo.bag'))
         writer.return_value.__enter__.return_value.add_connection.assert_has_calls(
@@ -388,6 +401,9 @@ def test_convert_2to1(tmp_path: Path) -> None:
                 call(b'\x45', 'std_msgs/msg/Bool'),
             ],
         )
+
+        with pytest.raises(ConverterError, match='No connections left for conversion'):
+            convert(Path('foobag'), None, ['/topic', '/other'])
 
         writerinst.connections.clear()
         cdr_to_ros1.side_effect = KeyError('exc')

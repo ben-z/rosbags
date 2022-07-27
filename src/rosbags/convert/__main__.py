@@ -50,6 +50,13 @@ def main() -> None:
         type=pathtype(exists=False),
         help='destination path for converted rosbag',
     )
+    parser.add_argument(
+        '--exclude-topic',
+        action='append',
+        default=[],
+        dest='exclude_topics',
+        help='exclude topic by name',
+    )
 
     args = parser.parse_args()
     if args.dst is not None and (args.src.suffix == '.bag') == (args.dst.suffix == '.bag'):
@@ -57,7 +64,7 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        convert(args.src, args.dst)
+        convert(**args.__dict__)
     except ConverterError as err:
         print(f'ERROR: {err}')  # noqa: T001
         sys.exit(1)

@@ -21,7 +21,7 @@ from rosbags.typesys.msg import generate_msgdef
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from typing import Any, Optional
+    from typing import Any, Optional, Sequence
 
 LATCH = """
 - history: 3
@@ -99,19 +99,25 @@ def downgrade_connection(rconn: Connection) -> Connection:
     )
 
 
-def convert_1to2(src: Path, dst: Path) -> None:
+def convert_1to2(src: Path, dst: Path, exclude_topics: Sequence[str]) -> None:
     """Convert Rosbag1 to Rosbag2.
 
     Args:
         src: Rosbag1 path.
         dst: Rosbag2 path.
+        exclude_topics: Topics to skip.
+
+    Raises:
+        ConverterError: If all connections are excluded.
 
     """
     with Reader1(src) as reader, Writer2(dst) as writer:
         typs: dict[str, Any] = {}
         connmap: dict[int, Connection] = {}
-
-        for rconn in reader.connections:
+        connections = [x for x in reader.connections if x.topic not in exclude_topics]
+        if not connections:
+            raise ConverterError('No connections left for conversion.')
+        for rconn in connections:
             candidate = upgrade_connection(rconn)
             assert isinstance(candidate.ext, ConnectionExtRosbag2)
             for conn in writer.connections:
@@ -132,22 +138,29 @@ def convert_1to2(src: Path, dst: Path) -> None:
             typs.update(get_types_from_msg(rconn.msgdef, rconn.msgtype))
         register_types(typs)
 
-        for rconn, timestamp, data in reader.messages():
+        for rconn, timestamp, data in reader.messages(connections=connections):
             data = ros1_to_cdr(data, rconn.msgtype)
             writer.write(connmap[rconn.id], timestamp, data)
 
 
-def convert_2to1(src: Path, dst: Path) -> None:
+def convert_2to1(src: Path, dst: Path, exclude_topics: Sequence[str]) -> None:
     """Convert Rosbag2 to Rosbag1.
 
     Args:
         src: Rosbag2 path.
         dst: Rosbag1 path.
+        exclude_topics: Topics to skip.
+
+    Raises:
+        ConverterError: If all connections are excluded.
 
     """
     with Reader2(src) as reader, Writer1(dst) as writer:
         connmap: dict[int, Connection] = {}
-        for rconn in reader.connections:
+        connections = [x for x in reader.connections if x.topic not in exclude_topics]
+        if not connections:
+            raise ConverterError('No connections left for conversion.')
+        for rconn in connections:
             candidate = downgrade_connection(rconn)
             assert isinstance(candidate.ext, ConnectionExtRosbag1)
             for conn in writer.connections:
@@ -168,17 +181,18 @@ def convert_2to1(src: Path, dst: Path) -> None:
                 )
             connmap[rconn.id] = conn
 
-        for rconn, timestamp, data in reader.messages():
+        for rconn, timestamp, data in reader.messages(connections=connections):
             data = cdr_to_ros1(data, rconn.msgtype)
             writer.write(connmap[rconn.id], timestamp, data)
 
 
-def convert(src: Path, dst: Optional[Path]) -> None:
+def convert(src: Path, dst: Optional[Path], exclude_topics: Sequence[str] = ()) -> None:
     """Convert between Rosbag1 and Rosbag2.
 
     Args:
         src: Source rosbag.
         dst: Destination rosbag.
+        exclude_topics: Topics to skip.
 
     Raises:
         ConverterError: An error occured during reading, writing, or
@@ -192,7 +206,7 @@ def convert(src: Path, dst: Optional[Path]) -> None:
     func = convert_1to2 if upgrade else convert_2to1
 
     try:
-        func(src, dst)
+        func(src, dst, exclude_topics)
     except (ReaderError1, ReaderError2) as err:
         raise ConverterError(f'Reading source bag: {err}') from err
     except (WriterError1, WriterError2) as err:
