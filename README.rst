@@ -6,6 +6,8 @@
    :target: https://gitlab.com/ternaris/rosbags/-/commits/master
    :alt: coverage report
 
+.. image:: https://img.shields.io/pypi/pyversions/rosbags
+   :alt: python versions
 
 =======
 Rosbags
