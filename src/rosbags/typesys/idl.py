@@ -254,8 +254,6 @@ string_literal
 class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
     """IDL file visitor."""
 
-    # pylint: disable=no-self-use
-
     RULES = parse_grammar(GRAMMAR_IDL)
 
     def __init__(self) -> None:

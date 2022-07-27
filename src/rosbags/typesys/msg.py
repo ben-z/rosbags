@@ -205,8 +205,6 @@ def denormalize_msgtype(typename: str) -> str:
 class VisitorMSG(Visitor):
     """MSG file visitor."""
 
-    # pylint: disable=no-self-use
-
     RULES = parse_grammar(GRAMMAR_MSG)
 
     BASETYPES = {

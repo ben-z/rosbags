@@ -60,13 +60,13 @@ def main() -> None:
 
     args = parser.parse_args()
     if args.dst is not None and (args.src.suffix == '.bag') == (args.dst.suffix == '.bag'):
-        print('Source and destination rosbag versions must differ.')  # noqa: T001
+        print('Source and destination rosbag versions must differ.')  # noqa: T201
         sys.exit(1)
 
     try:
         convert(**args.__dict__)
     except ConverterError as err:
-        print(f'ERROR: {err}')  # noqa: T001
+        print(f'ERROR: {err}')  # noqa: T201
         sys.exit(1)
 
 

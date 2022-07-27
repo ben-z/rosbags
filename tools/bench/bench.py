@@ -133,16 +133,16 @@ def main() -> None:
     """Benchmark rosbag2 against rosbag2_py."""
     path = Path(sys.argv[1])
     try:
-        print('Comparing messages from rosbag2 and rosbag2_py.')  # noqa: T001
+        print('Comparing messages from rosbag2 and rosbag2_py.')  # noqa: T201
         compare(path)
     except AssertionError as err:
-        print(f'Comparison failed {err!r}')  # noqa: T001
+        print(f'Comparison failed {err!r}')  # noqa: T201
         sys.exit(1)
 
-    print('Measuring execution times of rosbag2 and rosbag2_py.')  # noqa: T001
+    print('Measuring execution times of rosbag2 and rosbag2_py.')  # noqa: T201
     time_py = timeit(lambda: read_deser_rosbag2_py(path), number=1)
     time = timeit(lambda: read_deser_rosbag2(path), number=1)
-    print(  # noqa: T001
+    print(  # noqa: T201
         f'Processing times:\n'
         f'rosbag2_py {time_py:.3f}\n'
         f'rosbag2    {time:.3f}\n'

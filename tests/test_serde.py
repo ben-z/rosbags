@@ -254,7 +254,7 @@ def test_deserializer() -> None:
     assert msg.header.frame_id == 'foo42'
     field = msg.magnetic_field
     assert (field.x, field.y, field.z) == (128., 128., 128.)
-    diag = numpy.diag(msg.magnetic_field_covariance.reshape(3, 3))  # type: ignore
+    diag = numpy.diag(msg.magnetic_field_covariance.reshape(3, 3))
     assert (diag == [1., 1., 1.]).all()
 
     msg_big = deserialize_cdr(*MSG_MAGN_BIG[:2])

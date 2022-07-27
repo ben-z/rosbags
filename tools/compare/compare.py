@@ -67,7 +67,7 @@ def fixup_ros1(conns: List[rosbag.bag._Connection_Info]) -> None:
     genpy.Duration.nanosec = property(lambda x: x.nsecs)
 
     if conn := next((x for x in conns if x.datatype == 'sensor_msgs/CameraInfo'), None):
-        print('Patching CameraInfo')  # noqa: T001
+        print('Patching CameraInfo')  # noqa: T201
         cls = rosbag.bag._get_message_type(conn)  # pylint: disable=protected-access
         cls.d = property(lambda x: x.D, lambda x, y: setattr(x, 'D', y))  # noqa: B010
         cls.k = property(lambda x: x.K, lambda x, y: setattr(x, 'K', y))  # noqa: B010
@@ -135,7 +135,7 @@ def main_bag1_bag1(path1: Path, path2: Path) -> None:
     assert next(src1, None) is None
     assert next(src2, None) is None
 
-    print('Bags are identical.')  # noqa: T001
+    print('Bags are identical.')  # noqa: T201
 
 
 def main_bag1_bag2(path1: Path, path2: Path) -> None:
@@ -160,12 +160,12 @@ def main_bag1_bag2(path1: Path, path2: Path) -> None:
     assert next(src1, None) is None
     assert next(src2, None) is None
 
-    print('Bags are identical.')  # noqa: T001
+    print('Bags are identical.')  # noqa: T201
 
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print(f'Usage: {sys.argv} [rosbag1] [rosbag2]')  # noqa: T001
+        print(f'Usage: {sys.argv} [rosbag1] [rosbag2]')  # noqa: T201
         sys.exit(1)
     arg1 = Path(sys.argv[1])
     arg2 = Path(sys.argv[2])
