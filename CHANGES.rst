@@ -3,6 +3,15 @@
 Changes
 =======
 
+0.9.12 - 2022-07-27
+-------------------
+- Add support for rosbag2 version 6 metadata `#30`_
+- Enable rosbags-convert to exclude topics `#25`_
+
+.. _#30: https://gitlab.com/ternaris/rosbags/issues/30
+.. _#25: https://gitlab.com/ternaris/rosbags/issues/25
+
+
 0.9.11 - 2022-05-17
 -------------------
 - Report start_time and end_time on empty bags
