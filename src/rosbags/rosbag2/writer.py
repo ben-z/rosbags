@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from types import TracebackType
     from typing import Any, Literal, Optional, Type, Union
 
-    from .reader import Metadata
+    from .metadata import Metadata
 
 
 class WriterError(Exception):
