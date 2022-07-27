@@ -59,6 +59,15 @@ def test_writer(tmp_path: Path) -> None:
     assert (path / 'compress_message.db3').exists()
     assert size > (path / 'compress_message.db3').stat().st_size
 
+    path = (tmp_path / 'with_custom_data')
+    bag = Writer(path)
+    bag.open()
+    bag.set_custom_data('key1', 'value1')
+    with pytest.raises(WriterError, match='non-string value'):
+        bag.set_custom_data('key1', 42)  # type: ignore
+    bag.close()
+    assert b'key1: value1' in (path / 'metadata.yaml').read_bytes()
+
 
 def test_failure_cases(tmp_path: Path) -> None:
     """Test writer failure cases."""

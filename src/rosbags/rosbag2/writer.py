@@ -85,6 +85,7 @@ class Writer:  # pylint: disable=too-many-instance-attributes
         self.counts: dict[int, int] = {}
         self.conn: Optional[sqlite3.Connection] = None
         self.cursor: Optional[sqlite3.Cursor] = None
+        self.custom_data: dict[str, str] = {}
 
     def set_compression(self, mode: CompressionMode, fmt: CompressionFormat) -> None:
         """Enable compression on bag.
@@ -92,8 +93,8 @@ class Writer:  # pylint: disable=too-many-instance-attributes
         This function has to be called before opening.
 
         Args:
-            mode: Compression mode to use, either 'file' or 'message'
-            fmt: Compressor to use, currently only 'zstd'
+            mode: Compression mode to use, either 'file' or 'message'.
+            fmt: Compressor to use, currently only 'zstd'.
 
         Raises:
             WriterError: Bag already open.
@@ -106,6 +107,21 @@ class Writer:  # pylint: disable=too-many-instance-attributes
         self.compression_mode = mode.name.lower()
         self.compression_format = fmt.name.lower()
         self.compressor = zstandard.ZstdCompressor()
+
+    def set_custom_data(self, key: str, value: str) -> None:
+        """Set key value pair in custom_data.
+
+        Args:
+            key: Key to set.
+            value: Value to set.
+
+        Raises:
+            WriterError: If value has incorrect type.
+
+        """
+        if not isinstance(value, str):
+            raise WriterError(f'Cannot set non-string value {value!r} in custom_data.')
+        self.custom_data[key] = value
 
     def open(self) -> None:
         """Open rosbag2 for writing.
@@ -233,7 +249,7 @@ class Writer:  # pylint: disable=too-many-instance-attributes
 
         metadata: dict[str, Metadata] = {
             'rosbag2_bagfile_information': {
-                'version': 5,
+                'version': 6,
                 'storage_identifier': 'sqlite3',
                 'relative_file_paths': [self.dbpath.name],
                 'duration': {
@@ -268,6 +284,7 @@ class Writer:  # pylint: disable=too-many-instance-attributes
                         'message_count': count,
                     },
                 ],
+                'custom_data': self.custom_data,
             },
         }
         with self.metapath.open('w') as metafile:

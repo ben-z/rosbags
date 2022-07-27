@@ -65,6 +65,7 @@ class Reader:
         - Version 3: Added compression.
         - Version 4: Added QoS metadata to topics, changed relative file paths
         - Version 5: Added per file metadata
+        - Version 6: Added custom_data dict to metadata
 
     """
 
@@ -92,7 +93,7 @@ class Reader:
 
         try:
             self.metadata: Metadata = dct['rosbag2_bagfile_information']
-            if (ver := self.metadata['version']) > 5:
+            if (ver := self.metadata['version']) > 6:
                 raise ReaderError(f'Rosbag2 version {ver} not supported; please report issue.')
             if storageid := self.metadata['storage_identifier'] != 'sqlite3':
                 raise ReaderError(
@@ -129,6 +130,7 @@ class Reader:
                 raise ReaderError(f'Compression format {cfmt!r} is not supported.')
 
             self.files: list[FileInformation] = self.metadata.get('files', [])[:]
+            self.custom_data: dict[str, str] = self.metadata.get('custom_data', {})
         except KeyError as exc:
             raise ReaderError(f'A metadata key is missing {exc!r}.') from None
 

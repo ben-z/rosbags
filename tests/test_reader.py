@@ -57,7 +57,7 @@ rosbag2_bagfile_information:
 
 METADATA_EMPTY = """
 rosbag2_bagfile_information:
-  version: 4
+  version: 6
   storage_identifier: sqlite3
   relative_file_paths:
     - db.db3
@@ -69,6 +69,16 @@ rosbag2_bagfile_information:
   topics_with_message_count: []
   compression_format: ""
   compression_mode: ""
+  files:
+  - duration:
+      nanoseconds: 0
+    message_count: 0
+    path: db.db3
+    starting_time:
+      nanoseconds_since_epoch: 0
+  custom_data:
+    key1: value1
+    key2: value2
 """
 
 
@@ -146,6 +156,8 @@ def test_empty_bag(tmp_path: Path) -> None:
         assert reader.end_time == 0
         assert reader.duration == 0
         assert not list(reader.messages())
+        assert reader.custom_data['key1'] == 'value1'
+        assert reader.custom_data['key2'] == 'value2'
 
 
 def test_reader(bag: Path) -> None:
