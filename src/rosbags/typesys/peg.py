@@ -24,12 +24,12 @@ class Rule:
     """Rule base class."""
 
     LIT = 'LITERAL'
-    WS = re.compile(r'\s+', re.M | re.S)
 
     def __init__(
         self,
         value: Union[str, Pattern[str], Rule, list[Rule]],
         rules: dict[str, Rule],
+        whitespace: Pattern[str],
         name: Optional[str] = None,
     ):
         """Initialize.
@@ -37,16 +37,18 @@ class Rule:
         Args:
             value: Value of this rule.
             rules: Grammar containing all rules.
+            whitespace: Whitespace pattern.
             name: Name of this rule.
 
         """
         self.value = value
         self.rules = rules
         self.name = name
+        self.whitespace = whitespace
 
     def skip_ws(self, text: str, pos: int) -> int:
         """Skip whitespace."""
-        match = self.WS.match(text, pos)
+        match = self.whitespace.match(text, pos)
         return match.span()[1] if match else pos
 
     def make_node(self, data: T) -> Union[T, dict[str, Union[str, T]]]:
@@ -61,16 +63,23 @@ class Rule:
 class RuleLiteral(Rule):
     """Rule to match string literal."""
 
-    def __init__(self, value: str, rules: dict[str, Rule], name: Optional[str] = None):
+    def __init__(
+        self,
+        value: str,
+        rules: dict[str, Rule],
+        whitespace: Pattern[str],
+        name: Optional[str] = None,
+    ):
         """Initialize.
 
         Args:
             value: Value of this rule.
             rules: Grammar containing all rules.
+            whitespace: Whitespace pattern.
             name: Name of this rule.
 
         """
-        super().__init__(value, rules, name)
+        super().__init__(value, rules, whitespace, name)
         self.value = value[1:-1].replace('\\\'', '\'')
 
     def parse(self, text: str, pos: int) -> tuple[int, Any]:
@@ -89,16 +98,23 @@ class RuleRegex(Rule):
 
     value: Pattern[str]
 
-    def __init__(self, value: str, rules: dict[str, Rule], name: Optional[str] = None):
+    def __init__(
+        self,
+        value: str,
+        rules: dict[str, Rule],
+        whitespace: Pattern[str],
+        name: Optional[str] = None,
+    ):
         """Initialize.
 
         Args:
             value: Value of this rule.
             rules: Grammar containing all rules.
+            whitespace: Whitespace pattern.
             name: Name of this rule.
 
         """
-        super().__init__(value, rules, name)
+        super().__init__(value, rules, whitespace, name)
         self.value = re.compile(value[2:-1], re.M | re.S)
 
     def parse(self, text: str, pos: int) -> tuple[int, Any]:
@@ -234,7 +250,11 @@ def split_token(tok: str) -> list[str]:
     return list(filter(None, re.split(r'(^\()|(\)(?=[*+?]?$))|([*+?]$)', tok)))
 
 
-def collapse_tokens(toks: list[Optional[Rule]], rules: dict[str, Rule]) -> Rule:
+def collapse_tokens(
+    toks: list[Optional[Rule]],
+    rules: dict[str, Rule],
+    whitespace: Pattern[str],
+) -> Rule:
     """Collapse linear list of tokens to oneof of sequences."""
     value: list[Rule] = []
     seq: list[Rule] = []
@@ -242,13 +262,16 @@ def collapse_tokens(toks: list[Optional[Rule]], rules: dict[str, Rule]) -> Rule:
         if tok:
             seq.append(tok)
         else:
-            value.append(RuleSequence(seq, rules) if len(seq) > 1 else seq[0])
+            value.append(RuleSequence(seq, rules, whitespace) if len(seq) > 1 else seq[0])
             seq = []
-    value.append(RuleSequence(seq, rules) if len(seq) > 1 else seq[0])
-    return RuleOneof(value, rules) if len(value) > 1 else value[0]
+    value.append(RuleSequence(seq, rules, whitespace) if len(seq) > 1 else seq[0])
+    return RuleOneof(value, rules, whitespace) if len(value) > 1 else value[0]
 
 
-def parse_grammar(grammar: str) -> dict[str, Rule]:
+def parse_grammar(
+    grammar: str,
+    whitespace: Pattern[str] = re.compile(r'\s+', re.M | re.S),
+) -> dict[str, Rule]:
     """Parse grammar into rule dictionary."""
     rules: dict[str, Rule] = {}
     for token in grammar.split('\n\n'):
@@ -268,24 +291,24 @@ def parse_grammar(grammar: str) -> dict[str, Rule]:
                     '*': RuleZeroPlus,
                     '+': RuleOnePlus,
                     '?': RuleZeroOne,
-                }[tok](stack[-1], rules)
+                }[tok](stack[-1], rules, whitespace)
             elif tok == '/':
                 stack.append(None)
             elif tok == '(':
                 parens.append(len(stack))
             elif tok == ')':
                 index = parens.pop()
-                rule = collapse_tokens(stack[index:], rules)
+                rule = collapse_tokens(stack[index:], rules, whitespace)
                 stack = stack[:index]
                 stack.append(rule)
             elif len(tok) > 2 and tok[:2] == 'r\'':
-                stack.append(RuleRegex(tok, rules))
+                stack.append(RuleRegex(tok, rules, whitespace))
             elif tok[0] == '\'':
-                stack.append(RuleLiteral(tok, rules))
+                stack.append(RuleLiteral(tok, rules, whitespace))
             else:
-                stack.append(RuleToken(tok, rules))
+                stack.append(RuleToken(tok, rules, whitespace))
 
-        res = collapse_tokens(stack, rules)
+        res = collapse_tokens(stack, rules, whitespace)
         res.name = name
         rules[name] = res
     return rules

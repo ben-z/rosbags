@@ -12,6 +12,7 @@ Rosbag1 connection information.
 
 from __future__ import annotations
 
+import re
 from hashlib import md5
 from pathlib import PurePosixPath as Path
 from typing import TYPE_CHECKING
@@ -43,12 +44,8 @@ msgsep
   = r'================================================================================'
 
 definition
-  = comment
-  / const_dcl
+  = const_dcl
   / field_dcl
-
-comment
-  = r'#[^\n]*'
 
 const_dcl
   = 'string' identifier '=' r'(?!={79}\n)[^\n]+'
@@ -205,7 +202,7 @@ def denormalize_msgtype(typename: str) -> str:
 class VisitorMSG(Visitor):
     """MSG file visitor."""
 
-    RULES = parse_grammar(GRAMMAR_MSG)
+    RULES = parse_grammar(GRAMMAR_MSG, re.compile(r'(\s|#[^\n]*$)+', re.M | re.S))
 
     BASETYPES = {
         'bool',
@@ -221,9 +218,6 @@ class VisitorMSG(Visitor):
         'float64',
         'string',
     }
-
-    def visit_comment(self, _: str) -> None:
-        """Process comment, suppress output."""
 
     def visit_const_dcl(
         self,

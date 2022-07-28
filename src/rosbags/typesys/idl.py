@@ -11,6 +11,7 @@ Grammar, parse tree visitor and conversion functions for message definitions in
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 from .base import Nodetype, parse_message_definition
@@ -31,16 +32,11 @@ specification
   = definition+
 
 definition
-  = comment
-  / macro
+  = macro
   / include
   / module_dcl ';'
   / const_dcl ';'
   / type_dcl ';'
-
-comment
-  = r'/\*.*?\*/'
-  / r'[/][/][^\n]*'
 
 macro
   = ifndef
@@ -254,7 +250,10 @@ string_literal
 class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
     """IDL file visitor."""
 
-    RULES = parse_grammar(GRAMMAR_IDL)
+    RULES = parse_grammar(
+        GRAMMAR_IDL,
+        re.compile(r'(\s|/[*]([^*]|[*](?!/))*[*]/|//[^\n]*$)+', re.M | re.S),
+    )
 
     def __init__(self) -> None:
         """Initialize."""
@@ -298,9 +297,6 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
                     consts[ssubitem[1]] = []
         return {k: (consts[k], v) for k, v in structs.items()}
     # yapf: enable
-
-    def visit_comment(self, _: str) -> None:
-        """Process comment, suppress output."""
 
     def visit_macro(self, _: Union[LiteralMatch, tuple[LiteralMatch, str]]) -> None:
         """Process macro, suppress output."""

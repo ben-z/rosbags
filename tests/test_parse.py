@@ -118,6 +118,12 @@ module test_msgs {
   // comment in module
   typedef std_msgs::msg::Bool Bool;
 
+  /**/ /***/ /* block comment */
+
+  /*
+   * block comment
+   */
+
   module msg {
     // comment in submodule
     typedef Bool Balias;
@@ -131,10 +137,11 @@ module test_msgs {
 
     @comment(type="text", text="ignore")
     struct Foo {
+        // comment in struct
         std_msgs::msg::Header header;
         Balias bool;
         Bar sibling;
-        double x;
+        double/* comment in member declaration */x;
         sequence<double> seq1;
         sequence<double, 4> seq2;
         d4 array;
