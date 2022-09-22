@@ -73,6 +73,54 @@ def serialize_cdr(
     return rawdata.toreadonly()
 
 
+def deserialize_ros1(
+    rawdata: bytes,
+    typename: str,
+    typestore: Typestore = types,
+) -> Any:  # noqa: ANN401
+    """Deserialize raw data into a message object.
+
+    Args:
+        rawdata: Serialized data.
+        typename: Message type name.
+        typestore: Type store.
+
+    Returns:
+        Deserialized message object.
+
+    """
+    msgdef = get_msgdef(typename, typestore)
+    func = msgdef.deserialize_ros1
+    message, pos = func(rawdata, 0, msgdef.cls, typestore)
+    assert pos == len(rawdata)
+    return message
+
+
+def serialize_ros1(
+    message: object,
+    typename: str,
+    typestore: Typestore = types,
+) -> memoryview:
+    """Serialize message object to bytes.
+
+    Args:
+        message: Message object.
+        typename: Message type name.
+        typestore: Type store.
+
+    Returns:
+        Serialized bytes.
+
+    """
+    msgdef = get_msgdef(typename, typestore)
+    size = msgdef.getsize_ros1(0, message, typestore)
+    rawdata = memoryview(bytearray(size))
+    func = msgdef.serialize_ros1
+    pos = func(rawdata, 0, message, typestore)
+    assert pos == size
+    return rawdata.toreadonly()
+
+
 def ros1_to_cdr(raw: bytes, typename: str, typestore: Typestore = types) -> memoryview:
     """Convert serialized ROS1 message directly to CDR.
 

@@ -10,7 +10,15 @@ from unittest.mock import MagicMock, patch
 import numpy
 import pytest
 
-from rosbags.serde import SerdeError, cdr_to_ros1, deserialize_cdr, ros1_to_cdr, serialize_cdr
+from rosbags.serde import (
+    SerdeError,
+    cdr_to_ros1,
+    deserialize_cdr,
+    deserialize_ros1,
+    ros1_to_cdr,
+    serialize_cdr,
+    serialize_ros1,
+)
 from rosbags.serde.messages import get_msgdef
 from rosbags.typesys import get_types_from_msg, register_types, types
 from rosbags.typesys.types import builtin_interfaces__msg__Time as Time
@@ -206,6 +214,8 @@ def _comparable() -> Generator[None, None, None]:
 
         def __init__(self, *args: Any, **kwargs: Any):  # noqa: ANN401
             super().__init__(*args, **kwargs)
+            self.dtype = kwargs['wraps'].dtype
+            self.reshape = kwargs['wraps'].reshape
             self.__eq__ = arreq  # type: ignore
 
         def byteswap(self, *args: Any) -> CNDArray:  # noqa: ANN401
@@ -230,6 +240,11 @@ def test_serde(message: tuple[bytes, str, bool]) -> None:
     assert len(rawdata) - len(serdeser) < 4
     assert all(x == 0 for x in rawdata[len(serdeser):])
 
+    if rawdata[1] == 1:
+        rawdata = cdr_to_ros1(rawdata, typ)
+        serdeser = serialize_ros1(deserialize_ros1(rawdata, typ), typ)
+        assert serdeser == rawdata
+
 
 @pytest.mark.usefixtures('_comparable')
 def test_deserializer() -> None:
@@ -244,6 +259,8 @@ def test_deserializer() -> None:
     assert msg.points[1].x == 1.25
     assert msg.points[1].y == 2.25
     assert msg.points[1].z == 3.25
+    msg_ros1 = deserialize_ros1(cdr_to_ros1(*MSG_POLY[:2]), MSG_POLY[1])
+    assert msg_ros1 == msg
 
     msg = deserialize_cdr(*MSG_MAGN[:2])
     assert msg == deserialize(*MSG_MAGN[:2])
@@ -256,6 +273,8 @@ def test_deserializer() -> None:
     assert (field.x, field.y, field.z) == (128., 128., 128.)
     diag = numpy.diag(msg.magnetic_field_covariance.reshape(3, 3))
     assert (diag == [1., 1., 1.]).all()
+    msg_ros1 = deserialize_ros1(cdr_to_ros1(*MSG_MAGN[:2]), MSG_MAGN[1])
+    assert msg_ros1 == msg
 
     msg_big = deserialize_cdr(*MSG_MAGN_BIG[:2])
     assert msg_big == deserialize(*MSG_MAGN_BIG[:2])
@@ -384,10 +403,14 @@ def test_custom_type() -> None:
     assert res == deserialize(serialize(msg, cname), cname)
     assert res == msg
 
+    res = deserialize_ros1(serialize_ros1(msg, cname), cname)
+    assert res == msg
+
 
 def test_ros1_to_cdr() -> None:
     """Test ROS1 to CDR conversion."""
-    register_types(dict(get_types_from_msg(STATIC_16_64, 'test_msgs/msg/static_16_64')))
+    msgtype = 'test_msgs/msg/static_16_64'
+    register_types(dict(get_types_from_msg(STATIC_16_64, msgtype)))
     msg_ros = (b'\x01\x00'
                b'\x00\x00\x00\x00\x00\x00\x00\x02')
     msg_cdr = (
@@ -396,9 +419,11 @@ def test_ros1_to_cdr() -> None:
         b'\x00\x00\x00\x00\x00\x00'
         b'\x00\x00\x00\x00\x00\x00\x00\x02'
     )
-    assert ros1_to_cdr(msg_ros, 'test_msgs/msg/static_16_64') == msg_cdr
+    assert ros1_to_cdr(msg_ros, msgtype) == msg_cdr
+    assert serialize_cdr(deserialize_ros1(msg_ros, msgtype), msgtype) == msg_cdr
 
-    register_types(dict(get_types_from_msg(DYNAMIC_S_64, 'test_msgs/msg/dynamic_s_64')))
+    msgtype = 'test_msgs/msg/dynamic_s_64'
+    register_types(dict(get_types_from_msg(DYNAMIC_S_64, msgtype)))
     msg_ros = (b'\x01\x00\x00\x00X'
                b'\x00\x00\x00\x00\x00\x00\x00\x02')
     msg_cdr = (
@@ -407,12 +432,14 @@ def test_ros1_to_cdr() -> None:
         b'\x00\x00'
         b'\x00\x00\x00\x00\x00\x00\x00\x02'
     )
-    assert ros1_to_cdr(msg_ros, 'test_msgs/msg/dynamic_s_64') == msg_cdr
+    assert ros1_to_cdr(msg_ros, msgtype) == msg_cdr
+    assert serialize_cdr(deserialize_ros1(msg_ros, msgtype), msgtype) == msg_cdr
 
 
 def test_cdr_to_ros1() -> None:
     """Test CDR to ROS1 conversion."""
-    register_types(dict(get_types_from_msg(STATIC_16_64, 'test_msgs/msg/static_16_64')))
+    msgtype = 'test_msgs/msg/static_16_64'
+    register_types(dict(get_types_from_msg(STATIC_16_64, msgtype)))
     msg_ros = (b'\x01\x00'
                b'\x00\x00\x00\x00\x00\x00\x00\x02')
     msg_cdr = (
@@ -421,9 +448,11 @@ def test_cdr_to_ros1() -> None:
         b'\x00\x00\x00\x00\x00\x00'
         b'\x00\x00\x00\x00\x00\x00\x00\x02'
     )
-    assert cdr_to_ros1(msg_cdr, 'test_msgs/msg/static_16_64') == msg_ros
+    assert cdr_to_ros1(msg_cdr, msgtype) == msg_ros
+    assert serialize_ros1(deserialize_cdr(msg_cdr, msgtype), msgtype) == msg_ros
 
-    register_types(dict(get_types_from_msg(DYNAMIC_S_64, 'test_msgs/msg/dynamic_s_64')))
+    msgtype = 'test_msgs/msg/dynamic_s_64'
+    register_types(dict(get_types_from_msg(DYNAMIC_S_64, msgtype)))
     msg_ros = (b'\x01\x00\x00\x00X'
                b'\x00\x00\x00\x00\x00\x00\x00\x02')
     msg_cdr = (
@@ -432,7 +461,8 @@ def test_cdr_to_ros1() -> None:
         b'\x00\x00'
         b'\x00\x00\x00\x00\x00\x00\x00\x02'
     )
-    assert cdr_to_ros1(msg_cdr, 'test_msgs/msg/dynamic_s_64') == msg_ros
+    assert cdr_to_ros1(msg_cdr, msgtype) == msg_ros
+    assert serialize_ros1(deserialize_cdr(msg_cdr, msgtype), msgtype) == msg_ros
 
     header = Header(stamp=Time(42, 666), frame_id='frame')
     msg_ros = cdr_to_ros1(serialize_cdr(header, 'std_msgs/msg/Header'), 'std_msgs/msg/Header')

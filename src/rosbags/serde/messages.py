@@ -7,7 +7,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .cdr import generate_deserialize_cdr, generate_getsize_cdr, generate_serialize_cdr
-from .ros1 import generate_cdr_to_ros1, generate_ros1_to_cdr
+from .ros1 import (
+    generate_cdr_to_ros1,
+    generate_deserialize_ros1,
+    generate_getsize_ros1,
+    generate_ros1_to_cdr,
+    generate_serialize_ros1,
+)
 from .typing import Descriptor, Field, Msgdef
 from .utils import Valtype
 
@@ -62,6 +68,7 @@ def get_msgdef(typename: str, typestore: Typestore) -> Msgdef:
         fields = [Field(name, fixup(desc)) for name, desc in entries]
 
         getsize_cdr, size_cdr = generate_getsize_cdr(fields)
+        getsize_ros1, size_ros1 = generate_getsize_ros1(fields, typename)
 
         cache[typename] = Msgdef(
             typename,
@@ -73,6 +80,10 @@ def get_msgdef(typename: str, typestore: Typestore) -> Msgdef:
             generate_serialize_cdr(fields, 'be'),
             generate_deserialize_cdr(fields, 'le'),
             generate_deserialize_cdr(fields, 'be'),
+            size_ros1,
+            getsize_ros1,
+            generate_serialize_ros1(fields, typename),
+            generate_deserialize_ros1(fields, typename),
             generate_ros1_to_cdr(fields, typename, False),  # type: ignore
             generate_ros1_to_cdr(fields, typename, True),  # type: ignore
             generate_cdr_to_ros1(fields, typename, False),  # type: ignore

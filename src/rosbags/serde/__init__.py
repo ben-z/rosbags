@@ -9,12 +9,21 @@ convert directly between different serialization formats.
 """
 
 from .messages import SerdeError
-from .serdes import cdr_to_ros1, deserialize_cdr, ros1_to_cdr, serialize_cdr
+from .serdes import (
+    cdr_to_ros1,
+    deserialize_cdr,
+    deserialize_ros1,
+    ros1_to_cdr,
+    serialize_cdr,
+    serialize_ros1,
+)
 
 __all__ = [
     'SerdeError',
     'cdr_to_ros1',
     'deserialize_cdr',
+    'deserialize_ros1',
     'ros1_to_cdr',
     'serialize_cdr',
+    'serialize_ros1',
 ]

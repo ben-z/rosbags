@@ -15,6 +15,16 @@ Deserialize a CDR bytes object using :py:func:`deserialize_cdr() <rosbags.serde.
    # rawdata is of type bytes and contains serialized message
    msg = deserialize_cdr(rawdata, 'geometry_msgs/msg/Quaternion')
 
+Deserialize a ROS1 bytes object using :py:func:`deserialize_ros1() <rosbags.serde.deserialize_ros1>`:
+
+.. code-block:: python
+
+   from rosbags.serde import deserialize_ros1
+
+   # rawdata is of type bytes and contains serialized message
+   msg = deserialize_ros1(rawdata, 'geometry_msgs/msg/Quaternion')
+
+
 Serialization
 ---------------
 
@@ -29,3 +39,11 @@ Serialize a message with CDR using :py:func:`serialize_cdr() <rosbags.serde.seri
 
    # serialize message with explicit endianess
    serialized = serialize_cdr(msg, 'geometry_msgs/msg/Quaternion', little_endian=False)
+
+Serialize a message with ROS1 using :py:func:`serialize_ros1() <rosbags.serde.serialize_ros1>`:
+   
+.. code-block:: python
+
+   from rosbags.serde import serialize_ros1
+
+   serialized = serialize_ros1(msg, 'geometry_msgs/msg/Quaternion')

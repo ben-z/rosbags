@@ -45,6 +45,10 @@ class Msgdef(NamedTuple):
     serialize_cdr_be: CDRSer
     deserialize_cdr_le: CDRDeser
     deserialize_cdr_be: CDRDeser
+    size_ros1: int
+    getsize_ros1: CDRSerSize
+    serialize_ros1: CDRSer
+    deserialize_ros1: CDRDeser
     getsize_ros1_to_cdr: BitcvtSize
     ros1_to_cdr: Bitcvt
     getsize_cdr_to_ros1: BitcvtSize

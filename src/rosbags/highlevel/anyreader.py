@@ -15,7 +15,7 @@ from rosbags.rosbag1 import Reader as Reader1
 from rosbags.rosbag1 import ReaderError as ReaderError1
 from rosbags.rosbag2 import Reader as Reader2
 from rosbags.rosbag2 import ReaderError as ReaderError2
-from rosbags.serde import deserialize_cdr, ros1_to_cdr
+from rosbags.serde import deserialize_cdr, deserialize_ros1
 from rosbags.typesys import get_types_from_msg, register_types, types
 
 if TYPE_CHECKING:
@@ -101,7 +101,7 @@ class AnyReader:
 
     def _deser_ros1(self, rawdata: bytes, typ: str) -> object:
         """Deserialize ROS1 message."""
-        return deserialize_cdr(ros1_to_cdr(rawdata, typ, self.typestore), typ, self.typestore)
+        return deserialize_ros1(rawdata, typ, self.typestore)
 
     def _deser_ros2(self, rawdata: bytes, typ: str) -> object:
         """Deserialize CDR message."""

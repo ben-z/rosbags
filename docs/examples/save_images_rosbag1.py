@@ -3,7 +3,7 @@
 import numpy
 
 from rosbags.rosbag1 import Writer
-from rosbags.serde import cdr_to_ros1, serialize_cdr
+from rosbags.serde import serialize_ros1
 from rosbags.typesys.types import builtin_interfaces__msg__Time as Time
 from rosbags.typesys.types import sensor_msgs__msg__CompressedImage as CompressedImage
 from rosbags.typesys.types import std_msgs__msg__Header as Header
@@ -39,8 +39,5 @@ def save_images() -> None:
             writer.write(
                 conn,
                 timestamp,
-                cdr_to_ros1(
-                    serialize_cdr(message, CompressedImage.__msgtype__),
-                    CompressedImage.__msgtype__,
-                ),
+                serialize_ros1(message, CompressedImage.__msgtype__),
             )
