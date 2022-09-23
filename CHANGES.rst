@@ -3,6 +3,20 @@
 Changes
 =======
 
+0.9.13 - 2022-09-23
+-------------------
+- Fix parsing of comments in message definitions `#31`_
+- Fix parsing of members starting with ``string`` in message definitions `#35`_
+- Change lz4 compression level to 0 `#36`_
+- Add include filters to rosbag conversion `#38`_
+- Implement direct ros1 (de)serialization
+
+.. _#31: https://gitlab.com/ternaris/rosbags/issues/31
+.. _#35: https://gitlab.com/ternaris/rosbags/issues/35
+.. _#36: https://gitlab.com/ternaris/rosbags/issues/36
+.. _#38: https://gitlab.com/ternaris/rosbags/issues/38
+
+
 0.9.12 - 2022-07-27
 -------------------
 - Add support for rosbag2 version 6 metadata `#30`_
