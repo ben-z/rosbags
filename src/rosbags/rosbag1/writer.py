@@ -183,7 +183,7 @@ class Writer:
         self.compression_format = fmt.name.lower()
 
         bz2: Callable[[bytes], bytes] = lambda x: bz2_compress(x, 9)
-        lz4: Callable[[bytes], bytes] = lambda x: lz4_compress(x, 16)  # type: ignore
+        lz4: Callable[[bytes], bytes] = lambda x: lz4_compress(x, 0)  # type: ignore
         self.compressor = {
             'bz2': bz2,
             'lz4': lz4,
