@@ -169,7 +169,7 @@ octet_type
 
 string_type
   = 'string' '<' expression '>'
-  / 'string'
+  / 'string\b'
 
 scoped_name
   = identifier '::' scoped_name

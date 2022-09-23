@@ -154,6 +154,17 @@ module test_msgs {
 };
 """
 
+IDL_STRINGARRAY = """
+module test_msgs {
+  module msg {
+    typedef string string__3[3];
+    struct Strings {
+        string__3 values;
+    };
+  };
+};
+"""
+
 
 def test_parse_empty_msg() -> None:
     """Test msg parser with empty message."""
@@ -290,6 +301,13 @@ def test_parse_idl() -> None:
     assert len(fields) == 1
     assert fields[0][0] == 'i'
     assert fields[0][1][1] == 'int'
+
+    ret = get_types_from_idl(IDL_STRINGARRAY)
+    consts, fields = ret['test_msgs/msg/Strings']
+    assert consts == []
+    assert len(fields) == 1
+    assert fields[0][0] == 'values'
+    assert fields[0][1] == (Nodetype.ARRAY, ((Nodetype.NAME, 'string'), 3))
 
 
 def test_register_types() -> None:
