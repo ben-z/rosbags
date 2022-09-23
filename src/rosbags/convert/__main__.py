@@ -50,12 +50,20 @@ def main() -> None:
         type=pathtype(exists=False),
         help='destination path for converted rosbag',
     )
-    parser.add_argument(
+    topic_group = parser.add_argument_group('filtering').add_mutually_exclusive_group()
+    topic_group.add_argument(
         '--exclude-topic',
         action='append',
         default=[],
         dest='exclude_topics',
-        help='exclude topic by name',
+        help='topic to exclude from conversion, even if included explicitly',
+    )
+    topic_group.add_argument(
+        '--include-topic',
+        action='append',
+        default=[],
+        dest='include_topics',
+        help='topic to include in conversion, instead of all',
     )
 
     args = parser.parse_args()

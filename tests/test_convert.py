@@ -42,7 +42,12 @@ def test_cliwrapper(tmp_path: Path) -> None:
     with patch('rosbags.convert.__main__.convert') as cvrt, \
          patch.object(sys, 'argv', ['cvt', str(tmp_path / 'ros1.bag')]):
         main()
-    cvrt.assert_called_with(src=tmp_path / 'ros1.bag', dst=None, exclude_topics=[])
+    cvrt.assert_called_with(
+        src=tmp_path / 'ros1.bag',
+        dst=None,
+        exclude_topics=[],
+        include_topics=[],
+    )
 
     with patch('rosbags.convert.__main__.convert') as cvrt, \
          patch.object(sys, 'argv', ['cvt',
@@ -68,7 +73,12 @@ def test_cliwrapper(tmp_path: Path) -> None:
                                     '--dst',
                                     str(tmp_path / 'target')]):
         main()
-    cvrt.assert_called_with(src=tmp_path / 'ros1.bag', dst=tmp_path / 'target', exclude_topics=[])
+    cvrt.assert_called_with(
+        src=tmp_path / 'ros1.bag',
+        dst=tmp_path / 'target',
+        exclude_topics=[],
+        include_topics=[],
+    )
 
     with patch.object(sys, 'argv', ['cvt', str(tmp_path / 'ros1.bag')]), \
          patch('builtins.print') as mock_print, \
@@ -80,7 +90,12 @@ def test_cliwrapper(tmp_path: Path) -> None:
     with patch('rosbags.convert.__main__.convert') as cvrt, \
          patch.object(sys, 'argv', ['cvt', str(tmp_path / 'subdir')]):
         main()
-    cvrt.assert_called_with(src=tmp_path / 'subdir', dst=None, exclude_topics=[])
+    cvrt.assert_called_with(
+        src=tmp_path / 'subdir',
+        dst=None,
+        exclude_topics=[],
+        include_topics=[],
+    )
 
     with patch('rosbags.convert.__main__.convert') as cvrt, \
          patch.object(sys, 'argv', ['cvt',
@@ -97,7 +112,12 @@ def test_cliwrapper(tmp_path: Path) -> None:
                                     '--dst',
                                     str(tmp_path / 'target.bag')]):
         main()
-    cvrt.assert_called_with(src=tmp_path / 'subdir', dst=tmp_path / 'target.bag', exclude_topics=[])
+    cvrt.assert_called_with(
+        src=tmp_path / 'subdir',
+        dst=tmp_path / 'target.bag',
+        exclude_topics=[],
+        include_topics=[],
+    )
 
     with patch.object(sys, 'argv', ['cvt', str(tmp_path / 'subdir')]), \
          patch('builtins.print') as mock_print, \
@@ -112,7 +132,12 @@ def test_cliwrapper(tmp_path: Path) -> None:
                                     '--exclude-topic',
                                     '/foo']):
         main()
-    cvrt.assert_called_with(src=tmp_path / 'ros1.bag', dst=None, exclude_topics=['/foo'])
+    cvrt.assert_called_with(
+        src=tmp_path / 'ros1.bag',
+        dst=None,
+        exclude_topics=['/foo'],
+        include_topics=[],
+    )
 
 
 def test_convert_1to2(tmp_path: Path) -> None:

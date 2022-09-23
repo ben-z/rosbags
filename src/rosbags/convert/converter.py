@@ -99,13 +99,19 @@ def downgrade_connection(rconn: Connection) -> Connection:
     )
 
 
-def convert_1to2(src: Path, dst: Path, exclude_topics: Sequence[str]) -> None:
+def convert_1to2(
+    src: Path,
+    dst: Path,
+    exclude_topics: Sequence[str],
+    include_topics: Sequence[str],
+) -> None:
     """Convert Rosbag1 to Rosbag2.
 
     Args:
         src: Rosbag1 path.
         dst: Rosbag2 path.
-        exclude_topics: Topics to skip.
+        exclude_topics: Topics to exclude from conversion, even if included explicitly.
+        include_topics: Topics to include in conversion, instead of all.
 
     Raises:
         ConverterError: If all connections are excluded.
@@ -114,7 +120,10 @@ def convert_1to2(src: Path, dst: Path, exclude_topics: Sequence[str]) -> None:
     with Reader1(src) as reader, Writer2(dst) as writer:
         typs: dict[str, Any] = {}
         connmap: dict[int, Connection] = {}
-        connections = [x for x in reader.connections if x.topic not in exclude_topics]
+        connections = [
+            x for x in reader.connections
+            if x.topic not in exclude_topics and (not include_topics or x.topic in include_topics)
+        ]
         if not connections:
             raise ConverterError('No connections left for conversion.')
         for rconn in connections:
@@ -143,13 +152,19 @@ def convert_1to2(src: Path, dst: Path, exclude_topics: Sequence[str]) -> None:
             writer.write(connmap[rconn.id], timestamp, data)
 
 
-def convert_2to1(src: Path, dst: Path, exclude_topics: Sequence[str]) -> None:
+def convert_2to1(
+    src: Path,
+    dst: Path,
+    exclude_topics: Sequence[str],
+    include_topics: Sequence[str],
+) -> None:
     """Convert Rosbag2 to Rosbag1.
 
     Args:
         src: Rosbag2 path.
         dst: Rosbag1 path.
-        exclude_topics: Topics to skip.
+        exclude_topics: Topics to exclude from conversion, even if included explicitly.
+        include_topics: Topics to include in conversion, instead of all.
 
     Raises:
         ConverterError: If all connections are excluded.
@@ -157,7 +172,10 @@ def convert_2to1(src: Path, dst: Path, exclude_topics: Sequence[str]) -> None:
     """
     with Reader2(src) as reader, Writer1(dst) as writer:
         connmap: dict[int, Connection] = {}
-        connections = [x for x in reader.connections if x.topic not in exclude_topics]
+        connections = [
+            x for x in reader.connections
+            if x.topic not in exclude_topics and (not include_topics or x.topic in include_topics)
+        ]
         if not connections:
             raise ConverterError('No connections left for conversion.')
         for rconn in connections:
@@ -186,13 +204,19 @@ def convert_2to1(src: Path, dst: Path, exclude_topics: Sequence[str]) -> None:
             writer.write(connmap[rconn.id], timestamp, data)
 
 
-def convert(src: Path, dst: Optional[Path], exclude_topics: Sequence[str] = ()) -> None:
+def convert(
+    src: Path,
+    dst: Optional[Path],
+    exclude_topics: Sequence[str] = (),
+    include_topics: Sequence[str] = (),
+) -> None:
     """Convert between Rosbag1 and Rosbag2.
 
     Args:
         src: Source rosbag.
         dst: Destination rosbag.
-        exclude_topics: Topics to skip.
+        exclude_topics: Topics to exclude from conversion, even if included explicitly.
+        include_topics: Topics to include in conversion, instead of all.
 
     Raises:
         ConverterError: An error occured during reading, writing, or
@@ -206,7 +230,7 @@ def convert(src: Path, dst: Optional[Path], exclude_topics: Sequence[str] = ()) 
     func = convert_1to2 if upgrade else convert_2to1
 
     try:
-        func(src, dst, exclude_topics)
+        func(src, dst, exclude_topics, include_topics)
     except (ReaderError1, ReaderError2) as err:
         raise ConverterError(f'Reading source bag: {err}') from err
     except (WriterError1, WriterError2) as err:
