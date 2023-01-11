@@ -7,7 +7,8 @@ in the rosbag2 format.
 
 """
 
-from .reader import Reader, ReaderError
+from .errors import ReaderError
+from .reader import Reader
 from .writer import Writer, WriterError
 
 __all__ = [
