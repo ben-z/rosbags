@@ -1,4 +1,4 @@
-# Copyright 2020-2022  Ternaris.
+# Copyright 2020-2023  Ternaris.
 # SPDX-License-Identifier: Apache-2.0
 """Sphinx config."""
 
@@ -18,7 +18,7 @@ __all__ = ['_1', '_2', '_3', '_4', '_5']
 typing.TYPE_CHECKING = True
 
 project = 'Rosbags'
-copyright = '2020-2022, Ternaris'
+copyright = '2020-2023, Ternaris'
 author = 'Ternaris'
 
 autoapi_python_use_implicit_namespaces = True
