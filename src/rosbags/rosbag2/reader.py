@@ -47,7 +47,7 @@ def decompress(path: Path, do_decompress: bool) -> Generator[Path, None, None]:
             dbfile = Path(tempdir, path.stem)
             with path.open('rb') as infile, dbfile.open('wb') as outfile:
                 decomp.copy_stream(infile, outfile)
-                yield dbfile
+            yield dbfile
     else:
         yield path
 
