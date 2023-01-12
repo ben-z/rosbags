@@ -3,6 +3,15 @@
 Changes
 =======
 
+0.9.14 - 2023-01-12
+-------------------
+- Fix reader example in README `#40`_
+- Flush decompressed files rosbag2.Reader
+- Advertise Python 3.11 compatibility
+
+.. _#40: https://gitlab.com/ternaris/rosbags/issues/40
+
+
 0.9.13 - 2022-09-23
 -------------------
 - Fix parsing of comments in message definitions `#31`_
