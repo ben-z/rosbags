@@ -73,8 +73,8 @@ typedef_dcl
   = 'typedef' type_declarator
 
 type_declarator
-  = ( simple_type_spec
-    / template_type_spec
+  = ( template_type_spec
+    / simple_type_spec
     / constr_type_dcl
     ) any_declarators
 
@@ -169,7 +169,7 @@ octet_type
 
 string_type
   = 'string' '<' expression '>'
-  / 'string\b'
+  / r'string\b'
 
 scoped_name
   = identifier '::' scoped_name
@@ -491,10 +491,10 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
 
     def visit_string_type(
         self,
-        children: Union[StringNode, tuple[LiteralMatch, LiteralMatch, LiteralNode, LiteralMatch]],
+        children: Union[str, tuple[LiteralMatch, LiteralMatch, LiteralNode, LiteralMatch]],
     ) -> Union[StringNode, tuple[Nodetype, str, LiteralNode]]:
         """Prrocess string type specifier."""
-        if len(children) == 2:
+        if isinstance(children, str):
             return (Nodetype.BASE, 'string')
 
         assert len(children) == 4

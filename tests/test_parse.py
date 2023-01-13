@@ -307,7 +307,7 @@ def test_parse_idl() -> None:
     assert consts == []
     assert len(fields) == 1
     assert fields[0][0] == 'values'
-    assert fields[0][1] == (Nodetype.ARRAY, ((Nodetype.NAME, 'string'), 3))
+    assert fields[0][1] == (Nodetype.ARRAY, ((Nodetype.BASE, 'string'), 3))
 
 
 def test_register_types() -> None:
