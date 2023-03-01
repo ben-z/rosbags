@@ -192,7 +192,7 @@ class Writer:
     def open(self) -> None:
         """Open rosbag1 for writing."""
         try:
-            self.bio = self.path.open('xb')
+            self.bio = self.path.open('xb')  # pylint: disable=consider-using-with
         except FileExistsError:
             raise WriterError(f'{self.path} exists already, not overwriting.') from None
 

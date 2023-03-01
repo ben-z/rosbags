@@ -43,7 +43,7 @@ def generate_ros1_to_cdr(
     # pylint: disable=too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements
     aligned = 8
     iterators = tee([*fields, None])
-    icurr = cast(Iterator[Field], iterators[0])
+    icurr = cast('Iterator[Field]', iterators[0])
     inext = iterators[1]
     next(inext)
     funcname = 'ros1_to_cdr' if copy else 'getsize_ros1_to_cdr'
@@ -199,7 +199,7 @@ def generate_cdr_to_ros1(
     # pylint: disable=too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements
     aligned = 8
     iterators = tee([*fields, None])
-    icurr = cast(Iterator[Field], iterators[0])
+    icurr = cast('Iterator[Field]', iterators[0])
     inext = iterators[1]
     next(inext)
     funcname = 'cdr_to_ros1' if copy else 'getsize_cdr_to_ros1'

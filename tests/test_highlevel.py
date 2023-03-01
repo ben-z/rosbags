@@ -87,7 +87,7 @@ def test_anyreader1(bags1: Sequence[Path]) -> None:  # pylint: disable=redefined
     reader = AnyReader(bags1)
     with pytest.raises(AnyReaderError, match='seems to be empty'):
         reader.open()
-    assert all(not x.bio for x in reader.readers)
+    assert all(not x.bio for x in reader.readers)  # type: ignore[union-attr]
 
     with AnyReader(bags1[:3]) as reader:
         assert reader.duration == 15

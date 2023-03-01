@@ -366,7 +366,7 @@ class Reader:
     def open(self) -> None:
         """Open rosbag and read metadata."""
         try:
-            self.bio = self.path.open('rb')
+            self.bio = self.path.open('rb')  # pylint: disable=consider-using-with
         except OSError as err:
             raise ReaderError(f'Could not open file {str(self.path)!r}: {err.strerror}.') from err
 

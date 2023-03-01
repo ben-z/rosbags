@@ -69,8 +69,7 @@ def create_message(
     }, f'MSGCONTENT{msg}'.encode()
 
 
-def write_bag(  # pylint: disable=too-many-locals,too-many-statements
-
+def write_bag(  # pylint: disable=too-many-locals
     bag: Path,
     header: dict[str, bytes],
     chunks: Sequence[Any] = (),
@@ -129,8 +128,8 @@ def write_bag(  # pylint: disable=too-many-locals,too-many-statements
                 {
                     'op': b'\x05',
                     'compression': b'none',
-                    'size': pack('<L', len(chunk_bytes))
-                }
+                    'size': pack('<L', len(chunk_bytes)),
+                },
             ) + ser(chunk_bytes)
             for conn, data in index.items():
                 chunk_bytes += ser(
@@ -139,7 +138,7 @@ def write_bag(  # pylint: disable=too-many-locals,too-many-statements
                         'ver': pack('<L', 1),
                         'conn': pack('<L', conn),
                         'count': pack('<L', data['count']),
-                    }
+                    },
                 ) + ser(data['msgs'])
 
             chunks_bytes += chunk_bytes
@@ -151,7 +150,7 @@ def write_bag(  # pylint: disable=too-many-locals,too-many-statements
                     'start_time': pack('<LL', start_time, 0),
                     'end_time': pack('<LL', end_time, 0),
                     'count': pack('<L', len(counts.keys())),
-                }
+                },
             ) + ser(b''.join([pack('<LL', x, y) for x, y in counts.items()]))
             pos += len(chunk_bytes)
 
@@ -178,18 +177,16 @@ def test_indexdata() -> None:
     x42_2_0 = IndexData(42, 2, 0)
     x43_3_0 = IndexData(43, 3, 0)
 
-    # flake8: noqa
-    # pylint: disable=unneeded-not
     assert not x42_1_0 < x42_2_0
     assert x42_1_0 <= x42_2_0
     assert x42_1_0 == x42_2_0
-    assert not x42_1_0 != x42_2_0
+    assert not x42_1_0 != x42_2_0  # noqa
     assert x42_1_0 >= x42_2_0
     assert not x42_1_0 > x42_2_0
 
     assert x42_1_0 < x43_3_0
     assert x42_1_0 <= x43_3_0
-    assert not x42_1_0 == x43_3_0
+    assert not x42_1_0 == x43_3_0  # noqa
     assert x42_1_0 != x43_3_0
     assert not x42_1_0 >= x43_3_0
     assert not x42_1_0 > x43_3_0
@@ -215,10 +212,12 @@ def test_reader(tmp_path: Path) -> None:  # pylint: disable=too-many-statements
 
     # single message
     write_bag(
-        bag, create_default_header(), chunks=[[
+        bag,
+        create_default_header(),
+        chunks=[[
             create_connection(),
             create_message(time=42),
-        ]]
+        ]],
     )
     with Reader(bag) as reader:
         assert reader.message_count == 1
@@ -239,8 +238,8 @@ def test_reader(tmp_path: Path) -> None:  # pylint: disable=too-many-statements
                 create_connection(),
                 create_message(time=10, msg=10),
                 create_message(time=5, msg=5),
-            ]
-        ]
+            ],
+        ],
     )
     with Reader(bag) as reader:
         assert reader.message_count == 2
@@ -266,8 +265,8 @@ def test_reader(tmp_path: Path) -> None:  # pylint: disable=too-many-statements
                 create_message(time=10, msg=10),
                 create_connection(cid=2, topic=2),
                 create_message(cid=2, time=5, msg=5),
-            ]
-        ]
+            ],
+        ],
     )
     with Reader(bag) as reader:
         assert len(reader.topics.keys()) == 2
@@ -398,11 +397,13 @@ def test_failure_cases(tmp_path: Path) -> None:  # pylint: disable=too-many-stat
 
     # bad uint8 field
     write_bag(
-        bag, create_default_header(), chunks=[[
+        bag,
+        create_default_header(),
+        chunks=[[
             ({}, {}),
             create_connection(),
             create_message(),
-        ]]
+        ]],
     )
     with Reader(bag) as reader, \
          pytest.raises(ReaderError, match='field \'op\''):

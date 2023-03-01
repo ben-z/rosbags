@@ -6,7 +6,6 @@
 
 # flake8: noqa N801
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-lines
-# pylint: disable=unsubscriptable-object
 
 from __future__ import annotations
 
@@ -608,7 +607,7 @@ class rcl_interfaces__msg__ParameterValue:
     double_value: float
     string_value: str
     byte_array_value: numpy.ndarray[Any, numpy.dtype[numpy.uint8]]
-    bool_array_value: numpy.ndarray[Any, numpy.dtype[numpy.bool8]]
+    bool_array_value: numpy.ndarray[Any, numpy.dtype[numpy.bool_]]
     integer_array_value: numpy.ndarray[Any, numpy.dtype[numpy.int64]]
     double_array_value: numpy.ndarray[Any, numpy.dtype[numpy.float64]]
     string_array_value: list[str]

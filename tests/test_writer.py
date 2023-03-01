@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 def test_writer(tmp_path: Path) -> None:
     """Test Writer."""
-    path = (tmp_path / 'rosbag2')
+    path = tmp_path / 'rosbag2'
     with Writer(path) as bag:
         connection = bag.add_connection('/test', 'std_msgs/msg/Int8')
         bag.write(connection, 42, b'\x00')
@@ -26,7 +26,7 @@ def test_writer(tmp_path: Path) -> None:
     assert (path / 'rosbag2.db3').exists()
     size = (path / 'rosbag2.db3').stat().st_size
 
-    path = (tmp_path / 'compress_none')
+    path = tmp_path / 'compress_none'
     bag = Writer(path)
     bag.set_compression(bag.CompressionMode.NONE, bag.CompressionFormat.ZSTD)
     with bag:
@@ -37,7 +37,7 @@ def test_writer(tmp_path: Path) -> None:
     assert (path / 'compress_none.db3').exists()
     assert size == (path / 'compress_none.db3').stat().st_size
 
-    path = (tmp_path / 'compress_file')
+    path = tmp_path / 'compress_file'
     bag = Writer(path)
     bag.set_compression(bag.CompressionMode.FILE, bag.CompressionFormat.ZSTD)
     with bag:
@@ -48,7 +48,7 @@ def test_writer(tmp_path: Path) -> None:
     assert not (path / 'compress_file.db3').exists()
     assert (path / 'compress_file.db3.zstd').exists()
 
-    path = (tmp_path / 'compress_message')
+    path = tmp_path / 'compress_message'
     bag = Writer(path)
     bag.set_compression(bag.CompressionMode.MESSAGE, bag.CompressionFormat.ZSTD)
     with bag:
@@ -59,7 +59,7 @@ def test_writer(tmp_path: Path) -> None:
     assert (path / 'compress_message.db3').exists()
     assert size > (path / 'compress_message.db3').stat().st_size
 
-    path = (tmp_path / 'with_custom_data')
+    path = tmp_path / 'with_custom_data'
     bag = Writer(path)
     bag.open()
     bag.set_custom_data('key1', 'value1')

@@ -38,7 +38,7 @@ def generate_getsize_cdr(fields: list[Field]) -> tuple[CDRSerSize, int]:
 
     aligned = 8
     iterators = tee([*fields, None])
-    icurr = cast(Iterator[Field], iterators[0])
+    icurr = cast('Iterator[Field]', iterators[0])
     inext = iterators[1]
     next(inext)
     lines = [
@@ -178,7 +178,7 @@ def generate_serialize_cdr(fields: list[Field], endianess: str) -> CDRSer:
     # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     aligned = 8
     iterators = tee([*fields, None])
-    icurr = cast(Iterator[Field], iterators[0])
+    icurr = cast('Iterator[Field]', iterators[0])
     inext = iterators[1]
     next(inext)
     lines = [
@@ -317,7 +317,7 @@ def generate_deserialize_cdr(fields: list[Field], endianess: str) -> CDRDeser:
     # pylint: disable=too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements
     aligned = 8
     iterators = tee([*fields, None])
-    icurr = cast(Iterator[Field], iterators[0])
+    icurr = cast('Iterator[Field]', iterators[0])
     inext = iterators[1]
     next(inext)
     lines = [

@@ -46,7 +46,7 @@ def get_typehint(desc: tuple[int, Union[str, tuple[tuple[int, str], Optional[int
 
     sub = desc[1][0]
     if INTLIKE.match(sub[1]):
-        typ = 'bool8' if sub[1] == 'bool' else sub[1]
+        typ = 'bool_' if sub[1] == 'bool' else sub[1]
         return f'numpy.ndarray[Any, numpy.dtype[numpy.{typ}]]'
     assert isinstance(sub, tuple)
     return f'list[{get_typehint(sub)}]'
@@ -71,7 +71,6 @@ def generate_python_code(typs: Typesdict) -> str:
         '',
         '# flake8: noqa N801',
         '# pylint: disable=invalid-name,too-many-instance-attributes,too-many-lines',
-        '# pylint: disable=unsubscriptable-object',
         '',
         'from __future__ import annotations',
         '',

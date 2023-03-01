@@ -274,13 +274,13 @@ def serialize_array(
     if desc.valtype == Valtype.BASE:
         if desc.args == 'string':
             for item in val:
-                pos = serialize_string(rawdata, bmap, pos, cast(str, item))
+                pos = serialize_string(rawdata, bmap, pos, cast('str', item))
             return pos
 
         size = SIZEMAP[desc.args]
         pos = (pos + size - 1) & -size
         size *= len(val)
-        val = cast(NDArray[numpy.int_], val)
+        val = cast('NDArray[numpy.int_]', val)
         if (bmap is BASETYPEMAP_LE) != (sys.byteorder == 'little'):
             val = val.byteswap()  # no inplace on readonly array
         rawdata[pos:pos + size] = memoryview(val.tobytes())

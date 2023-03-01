@@ -138,7 +138,7 @@ class Reader:
             self.files: list[FileInformation] = self.metadata.get('files', [])[:]
             self.custom_data: dict[str, str] = self.metadata.get('custom_data', {})
 
-            self.tmpdir: Optional[TemporaryDirectory] = None
+            self.tmpdir: Optional[TemporaryDirectory[str]] = None
             self.storage: Optional[StorageProtocol] = None
         except KeyError as exc:
             raise ReaderError(f'A metadata key is missing {exc!r}.') from None
