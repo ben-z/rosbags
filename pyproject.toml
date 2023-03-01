@@ -1,25 +1,25 @@
 [build-system]
-requires = ["setuptools>=56.2.0", "wheel"]
+requires = ["setuptools>=65.4.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 
-[tool.coverage.report]
-exclude_lines = [
+[tool.coverage]
+report.exclude_lines = [
   "pragma: no cover",
   "if TYPE_CHECKING:",
   "if __name__ == '__main__':",
 ]
+report.show_missing = true
+report.skip_covered = true
+run.branch = true
+run.source = ["src"]
 
-[tool.coverage.run]
-source = [
-  "src",
-]
 
 [tool.flake8]
 avoid_escape = false
 docstring_convention = "all"
 docstring_style = "google"
-extend_exclude = ["venv*", ".venv*"]
+extend_exclude = ["venv"]
 ignore = [
   # do not require annotation of `self`
   "ANN101",
@@ -40,24 +40,30 @@ max_line_length = 100
 strictness = "long"
 suppress_none_returning = true
 
+
 [tool.isort]
 include_trailing_comma = true
 line_length = 100
 multi_line_output = 3
 
+
 [tool.mypy]
 explicit_package_bases = true
-mypy_path = "$MYPY_CONFIG_FILE_DIR/src"
+fast_module_lookup = true
+mypy_path = "src"
 namespace_packages = true
 strict = true
+
 
 [[tool.mypy.overrides]]
 module = "lz4.frame"
 ignore_missing_imports = true
 
+
 [tool.pydocstyle]
 convention = "google"
 add_select = ["D204", "D400", "D401", "D404", "D413"]
+
 
 [tool.pylint.'MESSAGES CONTROL']
 enable = "all"
@@ -72,7 +78,7 @@ disable = [
   "too-many-branches",
   # fixme
   "fixme",
-  # pep8-naming (pylint FAQ", keep: invalid-name)
+  # pep8-naming (pylint FAQ, keep: invalid-name)
   "bad-classmethod-argument",
   "bad-mcs-classmethod-argument",
   "no-self-argument",
@@ -95,22 +101,10 @@ disable = [
   "unused-variable",
 ]
 
+
 [tool.pytest.ini_options]
-addopts = [
-  "-v",
-  "--flake8",
-  "--mypy",
-  "--pylint",
-  "--yapf",
-  "--cov",
-  "--cov-branch",
-  "--cov-report=html",
-  "--cov-report=term",
-  "--cov-report=xml",
-  "--no-cov-on-fail",
-  "--junitxml=report.xml",
-]
-junit_family = "xunit2"
+addopts = ["--cov=src", "--verbose"]
+
 
 [tool.yapf]
 based_on_style = "google"
