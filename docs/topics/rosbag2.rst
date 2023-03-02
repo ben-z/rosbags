@@ -4,7 +4,7 @@ The :py:mod:`rosbags.rosbag2` package provides a conformant implementation of ro
 
 Supported Versions
 ------------------
-All versions up to the current (ROS2 Foxy) version 4 are supported.
+All versions up to the current (ROS2 Humble) version 6 are supported.
 
 Supported Features
 ------------------
@@ -18,6 +18,7 @@ Rosbag2 is a flexible format that supports plugging different serialization meth
 
 :Storages:
     - sqlite3
+    - mcap
 
 Writing rosbag2
 ---------------

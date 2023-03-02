@@ -17,6 +17,7 @@ from rosbags.rosbag2 import Reader as Reader2
 from rosbags.rosbag2 import ReaderError as ReaderError2
 from rosbags.serde import deserialize_cdr, deserialize_ros1
 from rosbags.typesys import get_types_from_msg, register_types, types
+from rosbags.typesys.idl import get_types_from_idl
 
 if TYPE_CHECKING:
     import sys
@@ -125,24 +126,34 @@ class AnyReader:
                     reader.close()
             raise AnyReaderError(*err.args) from err
 
+        for key in [
+            'builtin_interfaces/msg/Time',
+            'builtin_interfaces/msg/Duration',
+            'std_msgs/msg/Header',
+        ]:
+            self.typestore.FIELDDEFS[key] = types.FIELDDEFS[key]
+            attr = key.replace('/', '__')
+            setattr(self.typestore, attr, getattr(types, attr))
+        typs: dict[str, Any] = {}
         if self.is2:
-            for key, value in types.FIELDDEFS.items():
-                self.typestore.FIELDDEFS[key] = value
-                attr = key.replace('/', '__')
-                setattr(self.typestore, attr, getattr(types, attr))
+            reader = self.readers[0]
+            assert isinstance(reader, Reader2)
+            if reader.metadata['storage_identifier'] == 'mcap':
+                for connection in reader.connections:
+                    if connection.md5sum:
+                        if connection.md5sum == 'idl':
+                            typ = get_types_from_idl(connection.msgdef)
+                        else:
+                            typ = get_types_from_msg(connection.msgdef, connection.msgtype)
+                        typs.update(typ)
+                register_types(typs, self.typestore)
+            else:
+                for key, value in types.FIELDDEFS.items():
+                    self.typestore.FIELDDEFS[key] = value
+                    attr = key.replace('/', '__')
+                    setattr(self.typestore, attr, getattr(types, attr))
         else:
-            for key in [
-                'builtin_interfaces/msg/Time',
-                'builtin_interfaces/msg/Duration',
-                'std_msgs/msg/Header',
-            ]:
-                self.typestore.FIELDDEFS[key] = types.FIELDDEFS[key]
-                attr = key.replace('/', '__')
-                setattr(self.typestore, attr, getattr(types, attr))
-
-            typs: dict[str, Any] = {}
             for reader in self.readers:
-                assert isinstance(reader, Reader1)
                 for connection in reader.connections:
                     typs.update(get_types_from_msg(connection.msgdef, connection.msgtype))
             register_types(typs, self.typestore)

@@ -15,6 +15,7 @@ from ruamel.yaml.error import YAMLError
 from rosbags.interfaces import Connection, ConnectionExtRosbag2, TopicInfo
 
 from .errors import ReaderError
+from .storage_mcap import ReaderMcap
 from .storage_sqlite3 import ReaderSqlite3
 
 if TYPE_CHECKING:
@@ -29,19 +30,19 @@ class StorageProtocol(Protocol):
 
     def __init__(self, paths: Iterable[Path], connections: Iterable[Connection]):
         """Initialize."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def open(self) -> None:
         """Open file."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def close(self) -> None:
         """Close file."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def get_definitions(self) -> dict[str, tuple[str, str]]:
         """Get message definitions."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def messages(
         self,
@@ -50,7 +51,7 @@ class StorageProtocol(Protocol):
         stop: Optional[int] = None,
     ) -> Generator[tuple[Connection, int, bytes], None, None]:
         """Get messages from file."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class Reader:
@@ -73,6 +74,7 @@ class Reader:
     # pylint: disable=too-many-instance-attributes
 
     STORAGE_PLUGINS: dict[str, Type[StorageProtocol]] = {
+        'mcap': ReaderMcap,
         'sqlite3': ReaderSqlite3,
     }
 

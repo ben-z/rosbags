@@ -5,10 +5,12 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
 
 from rosbags.highlevel import AnyReader, AnyReaderError
+from rosbags.interfaces import Connection
 from rosbags.rosbag1 import Writer as Writer1
 from rosbags.rosbag2 import Writer as Writer2
 
@@ -200,3 +202,61 @@ def test_anyreader2(bags2: list[Path]) -> None:  # pylint: disable=redefined-out
         assert nxt[0].topic == '/topic1'
         with pytest.raises(StopIteration):
             next(gen)
+
+
+def test_anyreader2_autoregister(bags2: list[Path]) -> None:  # pylint: disable=redefined-outer-name
+    """Test AnyReader on rosbag2."""
+
+    class MockReader:
+        """Mock reader."""
+
+        # pylint: disable=too-few-public-methods
+
+        def __init__(self, paths: list[Path]):
+            """Initialize mock."""
+            _ = paths
+            self.metadata = {'storage_identifier': 'mcap'}
+            self.connections = [
+                Connection(
+                    1,
+                    '/foo',
+                    'test_msg/msg/Foo',
+                    'string foo',
+                    'msg',
+                    0,
+                    None,  # type: ignore
+                    self,
+                ),
+                Connection(
+                    2,
+                    '/bar',
+                    'test_msg/msg/Bar',
+                    'module test_msgs { module msg { struct Bar {string bar;}; }; };',
+                    'idl',
+                    0,
+                    None,  # type: ignore
+                    self,
+                ),
+                Connection(
+                    3,
+                    '/baz',
+                    'test_msg/msg/Baz',
+                    '',
+                    '',
+                    0,
+                    None,  # type: ignore
+                    self,
+                ),
+            ]
+
+        def open(self) -> None:
+            """Unused."""
+
+    with patch('rosbags.highlevel.anyreader.Reader2', MockReader), \
+         patch('rosbags.highlevel.anyreader.register_types') as mock_register_types:
+        AnyReader([bags2[0]]).open()
+    mock_register_types.assert_called_once()
+    assert mock_register_types.call_args[0][0] == {
+        'test_msg/msg/Foo': ([], [('foo', (1, 'string'))]),
+        'test_msgs/msg/Bar': ([], [('bar', (1, 'string'))]),
+    }
