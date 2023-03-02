@@ -3,6 +3,17 @@
 Changes
 =======
 
+0.9.15 - 2023-03-02
+-------------------
+- Refactor rosbag2 Reader for multipe storage backends
+- Improve parsing of IDL files
+- Handle bags contaning only connection records
+- Add AnyReader to documentation
+- Add initial MCAP reader for rosbag2 `#33`_
+
+.. _#33: https://gitlab.com/ternaris/rosbags/issues/33
+
+
 0.9.14 - 2023-01-12
 -------------------
 - Fix reader example in README `#40`_
