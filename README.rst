@@ -15,6 +15,7 @@ Rosbags
 
 Rosbags is the **pure python** library for everything rosbag. It contains:
 
+- **highlevel** easy-to-use interfaces,
 - **rosbag2** reader and writer,
 - **rosbag1** reader and writer,
 - **extensible** type system with serializers and deserializers,
@@ -34,18 +35,19 @@ Rosbags is published on PyPI and does not have any special dependencies. Simply 
    pip install rosbags
 
 
-Read and deserialize rosbag2 messages:
+Read and deserialize messages from rosbag1 or rosbag2 files:
 
 .. code-block:: python
 
-   from rosbags.rosbag2 import Reader
-   from rosbags.serde import deserialize_cdr
+   from pathlib import Path
+
+   from rosbags.highlevel import AnyReader
 
    # create reader instance and open for reading
-   with Reader('/home/ros/rosbag_2020_03_24') as reader:
+   with AnyReader([Path('/home/ros/rosbag_2020_03_24')]) as reader:
        connections = [x for x in reader.connections if x.topic == '/imu_raw/Imu']
        for connection, timestamp, rawdata in reader.messages(connections=connections):
-            msg = deserialize_cdr(rawdata, connection.msgtype)
+            msg = reader.deserialize(rawdata, connection.msgtype)
             print(msg.header.frame_id)
 
 

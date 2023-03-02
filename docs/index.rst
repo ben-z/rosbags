@@ -10,6 +10,7 @@
    :maxdepth: 1
    :hidden:
 
+   topics/highlevel
    topics/typesys
    topics/serde
    topics/rosbag2
