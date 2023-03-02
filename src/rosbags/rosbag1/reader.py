@@ -357,7 +357,7 @@ class Reader:
 
         self.bio: Optional[BinaryIO] = None
         self.connections: list[Connection] = []
-        self.indexes: dict[int, list[IndexData]]
+        self.indexes: dict[int, list[IndexData]] = {}
         self.index_data_header_offsets: Optional[tuple[int, int]] = None
         self.chunk_infos: list[ChunkInfo] = []
         self.chunks: dict[int, Chunk] = {}
@@ -396,6 +396,9 @@ class Reader:
 
             if index_pos == 0:
                 raise ReaderError('Bag is not indexed, reindex before reading.')
+
+            if chunk_count == 0:
+                return
 
             self.bio.seek(index_pos)
             try:
