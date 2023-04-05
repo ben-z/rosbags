@@ -92,7 +92,9 @@ def deserialize_ros1(
     msgdef = get_msgdef(typename, typestore)
     func = msgdef.deserialize_ros1
     message, pos = func(rawdata, 0, msgdef.cls, typestore)
-    assert pos == len(rawdata)
+    if pos != len(rawdata):
+        deserialized_size = msgdef.getsize_ros1(0, message, typestore)
+        print(f'WARNING: {typename} deserialization did not consume all bytes. {pos=} != {len(rawdata)=}. {deserialized_size=}', file=sys.stderr)
     return message
 
 
