@@ -92,9 +92,11 @@ def deserialize_ros1(
     msgdef = get_msgdef(typename, typestore)
     func = msgdef.deserialize_ros1
     message, pos = func(rawdata, 0, msgdef.cls, typestore)
-    if pos != len(rawdata):
-        deserialized_size = msgdef.getsize_ros1(0, message, typestore)
-        print(f'WARNING: {typename} deserialization did not consume all bytes. {pos=} != {len(rawdata)=}. {deserialized_size=}', file=sys.stderr)
+
+    # Allow for 1 byte of data to be left unread This happens with ROS 1 Imu messages.
+    # TODO: figure out why sometimes we are reading 1 byte less than expected
+    assert pos == len(rawdata) or pos == len(rawdata)-1, f'ERROR: {typename} deserialization did not consume all bytes. {pos=} != {len(rawdata)=}. deserialized_size={pos}'
+
     return message
 
 
