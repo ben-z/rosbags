@@ -39,7 +39,7 @@ def deserialize_cdr(
     msgdef = get_msgdef(typename, typestore)
     func = msgdef.deserialize_cdr_le if little_endian else msgdef.deserialize_cdr_be
     message, pos = func(rawdata[4:], 0, msgdef.cls, typestore)
-    assert pos + 4 + 3 >= len(rawdata)
+    assert pos + 4 + 3 + 1 >= len(rawdata)
     return message
 
 
