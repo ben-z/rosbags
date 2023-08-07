@@ -14,7 +14,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from .base import Nodetype, parse_message_definition
+from .base import Nodetype, normalize_fieldname, parse_message_definition
 from .peg import Visitor, parse_grammar
 
 if TYPE_CHECKING:
@@ -288,7 +288,9 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
                     structname, varname = csubitem[1][1].split('_Constants/')
                     if structname not in consts:
                         consts[structname] = []
-                    consts[structname].append((varname, csubitem[1][0], csubitem[1][2]))
+                    consts[structname].append(
+                        (normalize_fieldname(varname), csubitem[1][0], csubitem[1][2]),
+                    )
 
             for ssubitem in item[0][2]:
                 assert ssubitem[0] == Nodetype.STRUCT
@@ -420,7 +422,7 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
                 name = self.typedefs[name[1]]
             return name
 
-        yield from ((x[1][1], resolve_name(typename)) for x in flat if x)
+        yield from ((normalize_fieldname(x[1][1]), resolve_name(typename)) for x in flat if x)
     # yapf: enable
 
     def visit_struct_dcl(

@@ -18,7 +18,7 @@ from pathlib import PurePosixPath as Path
 from typing import TYPE_CHECKING
 
 from . import types
-from .base import Nodetype, TypesysError, parse_message_definition
+from .base import Nodetype, TypesysError, normalize_fieldname, parse_message_definition
 from .peg import Rule, Visitor, parse_grammar
 
 if TYPE_CHECKING:
@@ -244,10 +244,12 @@ class VisitorMSG(Visitor):
         res: Typesdict = {}
         for name, items in typedict.items():
             consts: Constdefs = [
-                (x[1][1], x[1][0], x[1][2]) for x in items if x[0] == (Nodetype.CONST, '')
+                (normalize_fieldname(x[1][1]), x[1][0], x[1][2])
+                for x in items
+                if x[0] == (Nodetype.CONST, '')
             ]
             fields: Fielddefs = [
-                (field[1][1], normalize_fieldtype(name, field[0], names))
+                (normalize_fieldname(field[1][1]), normalize_fieldtype(name, field[0], names))
                 for field in items
                 if field[0] != (Nodetype.CONST, '')
             ]
@@ -388,10 +390,12 @@ def gendefhash(
         raise TypesysError(f'Type {typename!r} is unknown.')
 
     for name, typ, value in typestore.FIELDDEFS[typename][0]:
+        name = name.rstrip('_')
         deftext.append(f'{typ} {name}={value}')
         hashtext.append(f'{typ} {name}={value}')
 
     for name, (ftype, args) in typestore.FIELDDEFS[typename][1]:
+        name = name.rstrip('_')
         if ftype == Nodetype.BASE:
             deftext.append(f'{args} {name}')
             hashtext.append(f'{args} {name}')

@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import keyword
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING
 
@@ -46,6 +47,23 @@ class Nodetype(IntEnum):
     ANNOTATION = auto()
     EXPRESSION_BINARY = auto()
     EXPRESSION_UNARY = auto()
+
+
+def normalize_fieldname(name: str) -> str:
+    """Normalize field name.
+
+    Avoid collisions with Python keywords.
+
+    Args:
+        name: Field name.
+
+    Returns:
+        Normalized name.
+
+    """
+    if keyword.iskeyword(name):
+        return f'{name}_'
+    return name
 
 
 def parse_message_definition(visitor: Visitor, text: str) -> Typesdict:
