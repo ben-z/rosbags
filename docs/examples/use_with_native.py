@@ -35,6 +35,8 @@ def to_native(msg: Any) -> Any:  # noqa: ANN401
         value = getattr(msg, name)
         if '__msg__' in field.type:
             value = to_native(value)
+        elif isinstance(value, list):
+            value = [to_native(x) for x in value]
         elif isinstance(value, numpy.ndarray):
             value = value.tolist()
         fields[name] = value
