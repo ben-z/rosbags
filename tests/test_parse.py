@@ -85,6 +85,11 @@ Header header
 Other other
 """
 
+KEYWORD_MSG = """
+bool return=true
+uint64 yield
+"""
+
 IDL_LANG = """
 // assign different literals and expressions
 
@@ -165,6 +170,19 @@ module test_msgs {
 };
 """
 
+IDL_KEYWORD = """
+module test_msgs {
+  module msg {
+    module Foo_Constants {
+        const int32 return = 32;
+    };
+    struct Foo {
+        uint64 yield;
+    };
+  };
+};
+"""
+
 
 def test_parse_empty_msg() -> None:
     """Test msg parser with empty message."""
@@ -221,7 +239,7 @@ def test_parse_msg() -> None:
     consts, fields = ret['test_msgs/msg/Foo']
     assert consts == [
         ('b', 'bool', True),
-        ('global', 'int32', 42),
+        ('global_', 'int32', 42),
         ('f', 'float32', 1.33),
         ('str', 'string', 'foo bar'),
     ]
@@ -275,6 +293,14 @@ def test_parse_relative_siblings_msg() -> None:
     assert ret['rel_msgs/msg/Foo'][1][1][1][1] == 'rel_msgs/msg/Other'
 
 
+def test_parse_msg_does_not_collide_keyword() -> None:
+    """Test message field names colliding with python keywords are renamed."""
+    ret = get_types_from_msg(KEYWORD_MSG, 'keyword_msgs/msg/Foo')
+    register_types(ret)
+    assert ret['keyword_msgs/msg/Foo'][0][0][0] == 'return_'
+    assert ret['keyword_msgs/msg/Foo'][1][0][0] == 'yield_'
+
+
 def test_parse_idl() -> None:
     """Test idl parser."""
     ret = get_types_from_idl(IDL_LANG)
@@ -308,6 +334,14 @@ def test_parse_idl() -> None:
     assert len(fields) == 1
     assert fields[0][0] == 'values'
     assert fields[0][1] == (Nodetype.ARRAY, ((Nodetype.BASE, 'string'), 3))
+
+
+def test_parse_idl_does_not_collide_keyword() -> None:
+    """Test message field names colliding with python keywords are renamed."""
+    ret = get_types_from_idl(IDL_KEYWORD)
+    register_types(ret)
+    assert ret['test_msgs/msg/Foo'][0][0][0] == 'return_'
+    assert ret['test_msgs/msg/Foo'][1][0][0] == 'yield_'
 
 
 def test_register_types() -> None:
