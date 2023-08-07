@@ -17,14 +17,15 @@ from hashlib import md5
 from pathlib import PurePosixPath as Path
 from typing import TYPE_CHECKING
 
+from . import types
 from .base import Nodetype, TypesysError, parse_message_definition
 from .peg import Rule, Visitor, parse_grammar
-from .types import FIELDDEFS
 
 if TYPE_CHECKING:
     from typing import Optional, Tuple, TypeVar, Union
 
     from .base import Constdefs, Fielddefs, Fielddesc, Typesdict
+    from .register import Typestore
 
     T = TypeVar('T')
 
@@ -353,7 +354,11 @@ def get_types_from_msg(text: str, name: str) -> Typesdict:
     return parse_message_definition(VisitorMSG(), f'MSG: {name}\n{text}')
 
 
-def gendefhash(typename: str, subdefs: dict[str, tuple[str, str]]) -> tuple[str, str]:
+def gendefhash(
+    typename: str,
+    subdefs: dict[str, tuple[str, str]],
+    typestore: Typestore = types,
+) -> tuple[str, str]:
     """Generate message definition and hash for type.
 
     The subdefs argument will be filled with child definitions.
@@ -361,6 +366,7 @@ def gendefhash(typename: str, subdefs: dict[str, tuple[str, str]]) -> tuple[str,
     Args:
         typename: Name of type to generate definition for.
         subdefs: Child definitions.
+        typestore: Custom type store.
 
     Returns:
         Message definition and hash.
@@ -370,6 +376,7 @@ def gendefhash(typename: str, subdefs: dict[str, tuple[str, str]]) -> tuple[str,
 
     """
     # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
     typemap = {
         'builtin_interfaces/msg/Time': 'time',
         'builtin_interfaces/msg/Duration': 'duration',
@@ -377,14 +384,14 @@ def gendefhash(typename: str, subdefs: dict[str, tuple[str, str]]) -> tuple[str,
 
     deftext: list[str] = []
     hashtext: list[str] = []
-    if typename not in FIELDDEFS:
+    if typename not in typestore.FIELDDEFS:
         raise TypesysError(f'Type {typename!r} is unknown.')
 
-    for name, typ, value in FIELDDEFS[typename][0]:
+    for name, typ, value in typestore.FIELDDEFS[typename][0]:
         deftext.append(f'{typ} {name}={value}')
         hashtext.append(f'{typ} {name}={value}')
 
-    for name, (ftype, args) in FIELDDEFS[typename][1]:
+    for name, (ftype, args) in typestore.FIELDDEFS[typename][1]:
         if ftype == Nodetype.BASE:
             deftext.append(f'{args} {name}')
             hashtext.append(f'{args} {name}')
@@ -397,7 +404,7 @@ def gendefhash(typename: str, subdefs: dict[str, tuple[str, str]]) -> tuple[str,
             else:
                 if subname not in subdefs:
                     subdefs[subname] = ('', '')
-                    subdefs[subname] = gendefhash(subname, subdefs)
+                    subdefs[subname] = gendefhash(subname, subdefs, typestore)
                 deftext.append(f'{denormalize_msgtype(subname)} {name}')
                 hashtext.append(f'{subdefs[subname][1]} {name}')
         else:
@@ -414,7 +421,7 @@ def gendefhash(typename: str, subdefs: dict[str, tuple[str, str]]) -> tuple[str,
             else:
                 if subname not in subdefs:
                     subdefs[subname] = ('', '')
-                    subdefs[subname] = gendefhash(subname, subdefs)
+                    subdefs[subname] = gendefhash(subname, subdefs, typestore)
                 deftext.append(f'{denormalize_msgtype(subname)}[{count}] {name}')
                 hashtext.append(f'{subdefs[subname][1]} {name}')
 
@@ -426,18 +433,19 @@ def gendefhash(typename: str, subdefs: dict[str, tuple[str, str]]) -> tuple[str,
     return '\n'.join(deftext), md5('\n'.join(hashtext).encode()).hexdigest()
 
 
-def generate_msgdef(typename: str) -> tuple[str, str]:
+def generate_msgdef(typename: str, typestore: Typestore = types) -> tuple[str, str]:
     """Generate message definition for type.
 
     Args:
         typename: Name of type to generate definition for.
+        typestore: Custom type store.
 
     Returns:
         Message definition.
 
     """
     subdefs: dict[str, tuple[str, str]] = {}
-    msgdef, md5sum = gendefhash(typename, subdefs)
+    msgdef, md5sum = gendefhash(typename, subdefs, typestore)
 
     msgdef = ''.join(
         [
