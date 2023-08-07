@@ -199,3 +199,28 @@ def test_compression_modes(tmp_path: Path, fmt: Optional[Writer.CompressionForma
         writer.write(conn, 42, b'\x42')
     data = path.read_bytes()
     assert data.count(f'compression={fmt.name.lower() if fmt else "none"}'.encode()) == 1
+
+
+@pytest.mark.parametrize('fmt', [None, Writer.CompressionFormat.BZ2, Writer.CompressionFormat.LZ4])
+def test_chunksize_is_correct(tmp_path: Path, fmt: Optional[Writer.CompressionFormat]) -> None:
+    """Test chunksize is correct."""
+    path = tmp_path / 'test1.bag'
+    writer = Writer(path)
+    if fmt:
+        writer.set_compression(fmt)
+    with writer:
+        conn = writer.add_connection('/foo', 'std_msgs/msg/Int8')
+        writer.write(conn, 42, b'\x42')
+    data = path.read_bytes()
+    assert b'size=\xca\x00\x00\x00' in data
+
+    path = tmp_path / 'test2.bag'
+    writer = Writer(path)
+    if fmt:
+        writer.set_compression(fmt)
+    with writer:
+        conn = writer.add_connection('/foo', 'std_msgs/msg/Int8')
+        writer.write(conn, 42, b'\x42')
+        writer.write(conn, 43, b'\x43')
+    data = path.read_bytes()
+    assert b'size=\xf9\x00\x00\x00' in data
