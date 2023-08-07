@@ -330,7 +330,7 @@ class Writer:
         """Write open chunk to file."""
         assert self.bio
 
-        if size := chunk.data.tell() > 0:
+        if (size := chunk.data.tell()) > 0:
             chunk.pos = self.bio.tell()
 
             header = Header()
