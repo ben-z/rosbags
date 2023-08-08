@@ -16,7 +16,7 @@ from itertools import tee
 from typing import TYPE_CHECKING, Iterator, cast
 
 from .typing import Field
-from .utils import SIZEMAP, Valtype, align, align_after, compile_lines
+from .utils import SIZEMAP, Valtype, align, align_after, compile_lines, ndtype
 
 if TYPE_CHECKING:
     from .typing import CDRDeser, CDRSer, CDRSerSize
@@ -186,6 +186,7 @@ def generate_serialize_cdr(fields: list[Field], endianess: str) -> CDRSer:
         'import numpy',
         'from rosbags.serde.messages import SerdeError, get_msgdef',
         f'from rosbags.serde.primitives import pack_bool_{endianess}',
+        f'from rosbags.serde.primitives import pack_octet_{endianess}',
         f'from rosbags.serde.primitives import pack_int8_{endianess}',
         f'from rosbags.serde.primitives import pack_int16_{endianess}',
         f'from rosbags.serde.primitives import pack_int32_{endianess}',
@@ -325,6 +326,7 @@ def generate_deserialize_cdr(fields: list[Field], endianess: str) -> CDRDeser:
         'import numpy',
         'from rosbags.serde.messages import SerdeError, get_msgdef',
         f'from rosbags.serde.primitives import unpack_bool_{endianess}',
+        f'from rosbags.serde.primitives import unpack_octet_{endianess}',
         f'from rosbags.serde.primitives import unpack_int8_{endianess}',
         f'from rosbags.serde.primitives import unpack_int16_{endianess}',
         f'from rosbags.serde.primitives import unpack_int32_{endianess}',
@@ -381,7 +383,7 @@ def generate_deserialize_cdr(fields: list[Field], endianess: str) -> CDRDeser:
                     size = length * SIZEMAP[subdesc.args]
                     lines.append(
                         f'  val = numpy.frombuffer(rawdata, '
-                        f'dtype=numpy.{subdesc.args}, count={length}, offset=pos)',
+                        f'dtype=numpy.{ndtype(subdesc.args)}, count={length}, offset=pos)',
                     )
                     if (endianess == 'le') != (sys.byteorder == 'little'):
                         lines.append('  val = val.byteswap()')
@@ -430,7 +432,7 @@ def generate_deserialize_cdr(fields: list[Field], endianess: str) -> CDRDeser:
                         lines.append(f'    pos = (pos + {anext_before} - 1) & -{anext_before}')
                     lines.append(
                         f'  val = numpy.frombuffer(rawdata, '
-                        f'dtype=numpy.{subdesc.args}, count=size, offset=pos)',
+                        f'dtype=numpy.{ndtype(subdesc.args)}, count=size, offset=pos)',
                     )
                     if (endianess == 'le') != (sys.byteorder == 'little'):
                         lines.append('  val = val.byteswap()')

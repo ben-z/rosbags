@@ -10,6 +10,7 @@ primitive values.
 from struct import Struct
 
 pack_bool_le = Struct('?').pack_into
+pack_octet_le = Struct('B').pack_into
 pack_int8_le = Struct('b').pack_into
 pack_int16_le = Struct('<h').pack_into
 pack_int32_le = Struct('<i').pack_into
@@ -21,6 +22,7 @@ pack_uint64_le = Struct('<Q').pack_into
 pack_float32_le = Struct('<f').pack_into
 pack_float64_le = Struct('<d').pack_into
 unpack_bool_le = Struct('?').unpack_from
+unpack_octet_le = Struct('B').unpack_from
 unpack_int8_le = Struct('b').unpack_from
 unpack_int16_le = Struct('<h').unpack_from
 unpack_int32_le = Struct('<i').unpack_from
@@ -32,6 +34,7 @@ unpack_uint64_le = Struct('<Q').unpack_from
 unpack_float32_le = Struct('<f').unpack_from
 unpack_float64_le = Struct('<d').unpack_from
 pack_bool_be = Struct('?').pack_into
+pack_octet_be = Struct('B').pack_into
 pack_int8_be = Struct('b').pack_into
 pack_int16_be = Struct('>h').pack_into
 pack_int32_be = Struct('>i').pack_into
@@ -43,6 +46,7 @@ pack_uint64_be = Struct('>Q').pack_into
 pack_float32_be = Struct('>f').pack_into
 pack_float64_be = Struct('>d').pack_into
 unpack_bool_be = Struct('?').unpack_from
+unpack_octet_be = Struct('B').unpack_from
 unpack_int8_be = Struct('b').unpack_from
 unpack_int16_be = Struct('>h').unpack_from
 unpack_int32_be = Struct('>i').unpack_from

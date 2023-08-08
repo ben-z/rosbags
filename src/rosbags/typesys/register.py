@@ -38,15 +38,19 @@ def get_typehint(desc: tuple[int, Union[str, tuple[tuple[int, str], Optional[int
     """
     if desc[0] == Nodetype.BASE:
         assert isinstance(desc[1], str)
-        return match.group(1) if (match := INTLIKE.match(desc[1])) else 'str'
+        typ = 'int' if desc[1] == 'octet' else desc[1]
+        return match.group(1) if (match := INTLIKE.match(typ)) else 'str'
 
     if desc[0] == Nodetype.NAME:
         assert isinstance(desc[1], str)
         return desc[1].replace('/', '__')
 
     sub = desc[1][0]
-    if INTLIKE.match(sub[1]):
-        typ = 'bool_' if sub[1] == 'bool' else sub[1]
+    if sub[1] == 'octet' or INTLIKE.match(sub[1]):
+        typ = {
+            'bool': 'bool_',
+            'octet': 'uint8',
+        }.get(sub[1], sub[1])
         return f'numpy.ndarray[Any, numpy.dtype[numpy.{typ}]]'
     assert isinstance(sub, tuple)
     return f'list[{get_typehint(sub)}]'

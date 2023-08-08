@@ -145,8 +145,8 @@ const_type
   / scoped_name
 
 base_type_spec
-  = integer_type
-  / float_type
+  = float_type
+  / integer_type
   / char_type
   / boolean_type
   / octet_type
@@ -156,7 +156,7 @@ integer_type
   / r'(unsigned\s+)?((long\s+)?long|int|short)\b'
 
 float_type
-  = r'((long\s+)?double|float)\b'
+  = r'(long.double|double|float)\b'
 
 char_type
   = r'char\b'
@@ -485,9 +485,9 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
         oname = children
         name = {
             'boolean': 'bool',
+            'long double': 'float128',
             'double': 'float64',
             'float': 'float32',
-            'octet': 'uint8',
         }.get(oname, oname)
         return (Nodetype.BASE, name)
 

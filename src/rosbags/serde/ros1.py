@@ -16,7 +16,7 @@ from itertools import tee
 from typing import TYPE_CHECKING, Iterator, cast
 
 from .typing import Field
-from .utils import SIZEMAP, Valtype, align, align_after, compile_lines
+from .utils import SIZEMAP, Valtype, align, align_after, compile_lines, ndtype
 
 if TYPE_CHECKING:
     from typing import Union
@@ -451,6 +451,7 @@ def generate_serialize_ros1(fields: list[Field], typename: str) -> CDRSer:
         'import numpy',
         'from rosbags.serde.messages import SerdeError, get_msgdef',
         'from rosbags.serde.primitives import pack_bool_le',
+        'from rosbags.serde.primitives import pack_octet_le',
         'from rosbags.serde.primitives import pack_int8_le',
         'from rosbags.serde.primitives import pack_int16_le',
         'from rosbags.serde.primitives import pack_int32_le',
@@ -566,6 +567,7 @@ def generate_deserialize_ros1(fields: list[Field], typename: str) -> CDRDeser:
         'import numpy',
         'from rosbags.serde.messages import SerdeError, get_msgdef',
         'from rosbags.serde.primitives import unpack_bool_le',
+        'from rosbags.serde.primitives import unpack_octet_le',
         'from rosbags.serde.primitives import unpack_int8_le',
         'from rosbags.serde.primitives import unpack_int16_le',
         'from rosbags.serde.primitives import unpack_int32_le',
@@ -621,7 +623,7 @@ def generate_deserialize_ros1(fields: list[Field], typename: str) -> CDRDeser:
                     size = length * SIZEMAP[subdesc.args]
                     lines.append(
                         f'  val = numpy.frombuffer(rawdata, '
-                        f'dtype=numpy.{subdesc.args}, count={length}, offset=pos)',
+                        f'dtype=numpy.{ndtype(subdesc.args)}, count={length}, offset=pos)',
                     )
                     lines.append(f'  if val.dtype.byteorder in {be_syms}:')
                     lines.append('    val = val.byteswap()')
@@ -659,7 +661,7 @@ def generate_deserialize_ros1(fields: list[Field], typename: str) -> CDRDeser:
                     lines.append(f'  length = size * {SIZEMAP[subdesc.args]}')
                     lines.append(
                         f'  val = numpy.frombuffer(rawdata, '
-                        f'dtype=numpy.{subdesc.args}, count=size, offset=pos)',
+                        f'dtype=numpy.{ndtype(subdesc.args)}, count=size, offset=pos)',
                     )
                     lines.append(f'  if val.dtype.byteorder in {be_syms}:')
                     lines.append('    val = val.byteswap()')
