@@ -12,7 +12,7 @@ from rosbags.typesys import (
     register_types,
     types,
 )
-from rosbags.typesys.base import Nodetype
+from rosbags.typesys.base import Nodetype, hash_rihs01
 
 MSG = """
 # comment
@@ -181,6 +181,19 @@ module test_msgs {
     };
   };
 };
+"""
+
+MSG_HASH = """
+byte[4] array
+byte[] sequence
+byte[<=4] bounded_sequence
+char[4] chars
+string str
+string[4] array_of_str
+string<=8 bounded_str
+string<=8[4] array_of_bounded_str
+string<=8[] sequence_of_bounded_str
+string<=8[<=4] bounded_sequence_of_bounded_str
 """
 
 
@@ -414,3 +427,31 @@ def test_ros1md5() -> None:
     register_types(get_types_from_msg(MSG_BOUNDS, 'test_msgs/msg/Bounds'))
     _, digest = generate_msgdef('test_msgs/msg/Bounds')
     assert digest == 'b5a877586c5b2c620b0ee3fa5a0933a0'
+
+    register_types(get_types_from_msg(MSG_HASH, 'test_msgs/msg/Hash'))
+    _, digest = generate_msgdef('test_msgs/msg/Hash')
+    assert digest == 'da79f46add822e47e8d80ce6923b222b'
+
+
+def test_rihs01() -> None:
+    """Test RIHS01 hashing."""
+    assert hash_rihs01(
+        'std_msgs/msg/Byte',
+        types,
+    ) == 'RIHS01_41e1a3345f73fe93ede006da826a6ee274af23dd4653976ff249b0f44e3e798f'
+
+    assert hash_rihs01(
+        'std_msgs/msg/ByteMultiArray',
+        types,
+    ) == 'RIHS01_972fec7f50ab3c1d06783c228e79e8a9a509021708c511c059926261ada901d4'
+
+    assert hash_rihs01(
+        'geometry_msgs/msg/Accel',
+        types,
+    ) == 'RIHS01_dc448243ded9b1fcbcca24aba0c22f013dae06c354ba2d849571c0a2a3f57ca0'
+
+    register_types(get_types_from_msg(MSG_HASH, 'test_msgs/msg/Hash'))
+    assert hash_rihs01(
+        'test_msgs/msg/Hash',
+        types,
+    ) == 'RIHS01_136fe82ed111f28ccca4ffb8e93b24942d858ef1f2a808cec546e313be75cf28'
