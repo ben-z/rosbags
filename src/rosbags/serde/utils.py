@@ -25,6 +25,8 @@ class Valtype(IntEnum):
 
 SIZEMAP: dict[str, int] = {
     'bool': 1,
+    'char': 1,
+    'octet': 1,
     'int8': 1,
     'int16': 2,
     'int32': 4,
@@ -35,6 +37,7 @@ SIZEMAP: dict[str, int] = {
     'uint64': 8,
     'float32': 4,
     'float64': 8,
+    'float128': 16,
 }
 
 
@@ -97,3 +100,11 @@ def compile_lines(lines: list[str]) -> ModuleType:
     module = module_from_spec(spec)
     exec('\n'.join(lines), module.__dict__)  # pylint: disable=exec-used
     return module
+
+
+def ndtype(typ: str) -> str:
+    """Normalize numpy dtype."""
+    return {
+        'bool': 'bool_',
+        'octet': 'uint8',
+    }.get(typ, typ)

@@ -264,7 +264,7 @@ def test_parse_multi_msg() -> None:
     assert 'test_msgs/msg/Other' in ret
     fields = ret['test_msgs/msg/Foo'][1]
     assert fields[0][1][1] == 'std_msgs/msg/Header'
-    assert fields[1][1][1] == 'uint8'
+    assert fields[1][1][1] == 'octet'
     assert fields[2][1][1] == 'uint8'
     consts = ret['test_msgs/msg/Other'][0]
     assert consts == [('static', 'uint32', 42)]
@@ -395,3 +395,12 @@ def test_generate_msgdef() -> None:
 
     with pytest.raises(TypesysError, match='is unknown'):
         generate_msgdef('foo_msgs/msg/Badname')
+
+
+def test_ros1md5() -> None:
+    """Test ROS1 MD5 hashing."""
+    _, digest = generate_msgdef('std_msgs/msg/Byte')
+    assert digest == 'ad736a2e8818154c487bb80fe42ce43b'
+
+    _, digest = generate_msgdef('std_msgs/msg/ByteMultiArray')
+    assert digest == '70ea476cbcfd65ac2f68f3cda1e891fe'

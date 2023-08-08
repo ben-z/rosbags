@@ -207,6 +207,7 @@ class VisitorMSG(Visitor):
 
     BASETYPES = {
         'bool',
+        'octet',
         'int8',
         'int16',
         'int32',
@@ -298,7 +299,7 @@ class VisitorMSG(Visitor):
         dct = {
             'time': 'builtin_interfaces/msg/Time',
             'duration': 'builtin_interfaces/msg/Duration',
-            'byte': 'uint8',
+            'byte': 'octet',
             'char': 'uint8',
         }
         return Nodetype.NAME, dct.get(typespec, typespec)
@@ -397,6 +398,8 @@ def gendefhash(
     for name, (ftype, args) in typestore.FIELDDEFS[typename][1]:
         name = name.rstrip('_')
         if ftype == Nodetype.BASE:
+            if args == 'octet':
+                args = 'byte'
             deftext.append(f'{args} {name}')
             hashtext.append(f'{args} {name}')
         elif ftype == Nodetype.NAME:
@@ -417,6 +420,8 @@ def gendefhash(
             count = '' if num is None else str(num)
             subtype, subname = subdesc
             if subtype == Nodetype.BASE:
+                if subname == 'octet':
+                    subname = 'byte'
                 deftext.append(f'{subname}[{count}] {name}')
                 hashtext.append(f'{subname}[{count}] {name}')
             elif subname in typemap:
