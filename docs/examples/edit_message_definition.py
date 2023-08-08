@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from build.lib.rosbags.serde.serdes import serialize_ros1
+
 from rosbags.highlevel.anyreader import AnyReader, SimpleTypeStore
 from rosbags.rosbag1 import Writer
 from rosbags.typesys import get_types_from_msg
@@ -67,7 +68,7 @@ def downgrade_camerainfo_to_rosbag1(src: Path, dst: Path) -> None:
             if conn.msgtype == 'sensor_msgs/msg/CameraInfo':
                 msgdef, md5sum = gendefhash(conn.msgtype, {}, typestore)
             else:
-                msgdef, md5sum = conn.msgdef, conn.md5sum
+                msgdef, md5sum = conn.msgdef, conn.digest
 
             conn_map[conn.id] = writer.add_connection(
                 conn.topic,

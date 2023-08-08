@@ -140,8 +140,8 @@ class AnyReader:
             assert isinstance(reader, Reader2)
             if reader.metadata['storage_identifier'] == 'mcap':
                 for connection in reader.connections:
-                    if connection.md5sum:
-                        if connection.md5sum == 'idl':
+                    if connection.digest:
+                        if connection.digest == 'idl':
                             typ = get_types_from_idl(connection.msgdef)
                         else:
                             typ = get_types_from_msg(connection.msgdef, connection.msgtype)

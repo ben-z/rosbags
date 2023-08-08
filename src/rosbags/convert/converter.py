@@ -184,7 +184,7 @@ def convert_2to1(
             for conn in writer.connections:
                 assert isinstance(conn.ext, ConnectionExtRosbag1)
                 if (
-                    conn.topic == candidate.topic and conn.md5sum == candidate.md5sum and
+                    conn.topic == candidate.topic and conn.digest == candidate.digest and
                     conn.ext.latching == candidate.ext.latching
                 ):
                     break
@@ -193,7 +193,7 @@ def convert_2to1(
                     candidate.topic,
                     candidate.msgtype,
                     candidate.msgdef,
-                    candidate.md5sum,
+                    candidate.digest,
                     candidate.ext.callerid,
                     candidate.ext.latching,
                 )

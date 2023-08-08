@@ -31,7 +31,7 @@ class Connection(NamedTuple):
     topic: str
     msgtype: str
     msgdef: str
-    md5sum: str
+    digest: str
     msgcount: int
     ext: Union[ConnectionExtRosbag1, ConnectionExtRosbag2]
     owner: object

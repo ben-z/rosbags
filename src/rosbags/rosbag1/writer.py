@@ -315,7 +315,7 @@ class Writer:
         header = Header()
         header.set_string('topic', connection.topic)
         header.set_string('type', connection.msgtype)
-        header.set_string('md5sum', connection.md5sum)
+        header.set_string('md5sum', connection.digest)
         header.set_string('message_definition', connection.msgdef)
         assert isinstance(connection.ext, ConnectionExtRosbag1)
         if connection.ext.callerid is not None:
