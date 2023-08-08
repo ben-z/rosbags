@@ -257,6 +257,6 @@ def test_anyreader2_autoregister(bags2: list[Path]) -> None:  # pylint: disable=
         AnyReader([bags2[0]]).open()
     mock_register_types.assert_called_once()
     assert mock_register_types.call_args[0][0] == {
-        'test_msg/msg/Foo': ([], [('foo', (1, 'string'))]),
-        'test_msgs/msg/Bar': ([], [('bar', (1, 'string'))]),
+        'test_msg/msg/Foo': ([], [('foo', (1, ('string', 0)))]),
+        'test_msgs/msg/Bar': ([], [('bar', (1, ('string', 0)))]),
     }

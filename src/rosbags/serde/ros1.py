@@ -68,7 +68,7 @@ def generate_ros1_to_cdr(
             aligned = align_after(desc)
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 lines.append('  length = unpack_int32_le(input, ipos)[0] + 1')
                 if copy:
                     lines.append('  pack_int32_le(output, opos, length)')
@@ -91,7 +91,7 @@ def generate_ros1_to_cdr(
             subdesc, length = desc.args
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     for _ in range(length):
                         lines.append('  opos = (opos + 4 - 1) & -4')
                         lines.append('  length = unpack_int32_le(input, ipos)[0] + 1')
@@ -135,7 +135,7 @@ def generate_ros1_to_cdr(
             aligned = 4
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append('  for _ in range(size):')
                     lines.append('    length = unpack_int32_le(input, ipos)[0] + 1')
                     lines.append('    opos = (opos + 4 - 1) & -4')
@@ -224,7 +224,7 @@ def generate_cdr_to_ros1(
             aligned = align_after(desc)
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 lines.append('  length = unpack_int32_le(input, ipos)[0] - 1')
                 if copy:
                     lines.append('  pack_int32_le(output, opos, length)')
@@ -247,7 +247,7 @@ def generate_cdr_to_ros1(
             subdesc, length = desc.args
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     for _ in range(length):
                         lines.append('  ipos = (ipos + 4 - 1) & -4')
                         lines.append('  length = unpack_int32_le(input, ipos)[0] - 1')
@@ -291,7 +291,7 @@ def generate_cdr_to_ros1(
             aligned = 4
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append('  for _ in range(size):')
                     lines.append('    ipos = (ipos + 4 - 1) & -4')
                     lines.append('    length = unpack_int32_le(input, ipos)[0] - 1')
@@ -371,7 +371,7 @@ def generate_getsize_ros1(fields: list[Field], typename: str) -> tuple[CDRSerSiz
                 is_stat = False
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 lines.append(f'  pos += 4 + len(message.{fieldname}.encode())')
                 is_stat = False
             else:
@@ -382,7 +382,7 @@ def generate_getsize_ros1(fields: list[Field], typename: str) -> tuple[CDRSerSiz
             subdesc, length = desc.args
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append(f'  val = message.{fieldname}')
                     for idx in range(length):
                         lines.append(f'  pos += 4 + len(val[{idx}].encode())')
@@ -410,7 +410,7 @@ def generate_getsize_ros1(fields: list[Field], typename: str) -> tuple[CDRSerSiz
             lines.append('  pos += 4')
             subdesc = desc.args[0]
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append(f'  for val in message.{fieldname}:')
                     lines.append('    pos += 4 + len(val.encode())')
                 else:
@@ -480,7 +480,7 @@ def generate_serialize_ros1(fields: list[Field], typename: str) -> CDRSer:
             lines.append('  pos = func(rawdata, pos, val, typestore)')
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 lines.append('  bval = memoryview(val.encode())')
                 lines.append('  length = len(bval)')
                 lines.append('  pack_int32_le(rawdata, pos, length)')
@@ -497,7 +497,7 @@ def generate_serialize_ros1(fields: list[Field], typename: str) -> CDRSer:
             lines.append('    raise SerdeError(\'Unexpected array length\')')
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     for idx in range(length):
                         lines.append(f'  bval = memoryview(val[{idx}].encode())')
                         lines.append('  length = len(bval)')
@@ -525,7 +525,7 @@ def generate_serialize_ros1(fields: list[Field], typename: str) -> CDRSer:
             subdesc = desc.args[0]
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append('  for item in val:')
                     lines.append('    bval = memoryview(item.encode())')
                     lines.append('    length = len(bval)')
@@ -597,7 +597,7 @@ def generate_deserialize_ros1(fields: list[Field], typename: str) -> CDRDeser:
             lines.append('  values.append(obj)')
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 lines.append('  length = unpack_int32_le(rawdata, pos)[0]')
                 lines.append('  string = bytes(rawdata[pos + 4:pos + 4 + length]).decode()')
                 lines.append('  values.append(string)')
@@ -610,7 +610,7 @@ def generate_deserialize_ros1(fields: list[Field], typename: str) -> CDRDeser:
         elif desc.valtype == Valtype.ARRAY:
             subdesc, length = desc.args
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append('  value = []')
                     for _ in range(length):
                         lines.append('  length = unpack_int32_le(rawdata, pos)[0]')
@@ -647,7 +647,7 @@ def generate_deserialize_ros1(fields: list[Field], typename: str) -> CDRDeser:
             subdesc = desc.args[0]
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append('  value = []')
                     lines.append('  for _ in range(size):')
                     lines.append('    length = unpack_int32_le(rawdata, pos)[0]')

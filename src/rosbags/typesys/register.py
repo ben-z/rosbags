@@ -10,12 +10,12 @@ from importlib.util import module_from_spec, spec_from_loader
 from typing import TYPE_CHECKING
 
 from . import types
-from .base import Nodetype, TypesysError
+from .base import TypesysError
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Protocol, Union
+    from typing import Any, Protocol, Union
 
-    from .base import Typesdict
+    from .base import Fielddesc, Typesdict
 
     class Typestore(Protocol):  # pylint: disable=too-few-public-methods
         """Type storage."""
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 INTLIKE = re.compile('^u?(bool|int|float)')
 
 
-def get_typehint(desc: tuple[int, Union[str, tuple[tuple[int, str], Optional[int]]]]) -> str:
+def get_typehint(desc: Fielddesc) -> str:
     """Get python type hint for field.
 
     Args:
@@ -36,21 +36,27 @@ def get_typehint(desc: tuple[int, Union[str, tuple[tuple[int, str], Optional[int
         Type hint for field.
 
     """
-    if desc[0] == Nodetype.BASE:
+    if desc[0] == 1:
+        if isinstance(desc[1], tuple):
+            return 'str'
         assert isinstance(desc[1], str)
         typ = 'int' if desc[1] == 'octet' else desc[1]
-        return match.group(1) if (match := INTLIKE.match(typ)) else 'str'
+        match = INTLIKE.match(typ)
+        assert match, typ
+        return match.group(1)
 
-    if desc[0] == Nodetype.NAME:
+    if desc[0] == 2:
         assert isinstance(desc[1], str)
         return desc[1].replace('/', '__')
 
+    assert desc[0] == 3 or desc[0] == 4
     sub = desc[1][0]
-    if sub[1] == 'octet' or INTLIKE.match(sub[1]):
+    sub1: Union[str, tuple[str, int]] = sub[1]
+    if isinstance(sub1, str) and (sub1 == 'octet' or INTLIKE.match(sub1)):
         typ = {
             'bool': 'bool_',
             'octet': 'uint8',
-        }.get(sub[1], sub[1])
+        }.get(sub1, sub1)
         return f'numpy.ndarray[Any, numpy.dtype[numpy.{typ}]]'
     assert isinstance(sub, tuple)
     return f'list[{get_typehint(sub)}]'

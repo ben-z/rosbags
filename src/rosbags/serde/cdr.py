@@ -60,7 +60,7 @@ def generate_getsize_cdr(fields: list[Field]) -> tuple[CDRSerSize, int]:
             aligned = align_after(desc)
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 lines.append(f'  pos += 4 + len(message.{fieldname}.encode()) + 1')
                 aligned = 1
                 is_stat = False
@@ -73,7 +73,7 @@ def generate_getsize_cdr(fields: list[Field]) -> tuple[CDRSerSize, int]:
             subdesc, length = desc.args
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append(f'  val = message.{fieldname}')
                     for idx in range(length):
                         lines.append('  pos = (pos + 4 - 1) & -4')
@@ -113,7 +113,7 @@ def generate_getsize_cdr(fields: list[Field]) -> tuple[CDRSerSize, int]:
             aligned = 4
             subdesc = desc.args[0]
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append(f'  for val in message.{fieldname}:')
                     lines.append('    pos = (pos + 4 - 1) & -4')
                     lines.append('    pos += 4 + len(val.encode()) + 1')
@@ -210,7 +210,7 @@ def generate_serialize_cdr(fields: list[Field], endianess: str) -> CDRSer:
             aligned = align_after(desc)
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 lines.append('  bval = memoryview(val.encode())')
                 lines.append('  length = len(bval) + 1')
                 lines.append(f'  pack_int32_{endianess}(rawdata, pos, length)')
@@ -229,7 +229,7 @@ def generate_serialize_cdr(fields: list[Field], endianess: str) -> CDRSer:
             lines.append('    raise SerdeError(\'Unexpected array length\')')
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     for idx in range(length):
                         lines.append(f'  bval = memoryview(val[{idx}].encode())')
                         lines.append('  length = len(bval) + 1')
@@ -265,7 +265,7 @@ def generate_serialize_cdr(fields: list[Field], endianess: str) -> CDRSer:
             subdesc = desc.args[0]
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append('  for item in val:')
                     lines.append('    bval = memoryview(item.encode())')
                     lines.append('    length = len(bval) + 1')
@@ -352,7 +352,7 @@ def generate_deserialize_cdr(fields: list[Field], endianess: str) -> CDRDeser:
             aligned = align_after(desc)
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 lines.append(f'  length = unpack_int32_{endianess}(rawdata, pos)[0]')
                 lines.append('  string = bytes(rawdata[pos + 4:pos + 4 + length - 1]).decode()')
                 lines.append('  values.append(string)')
@@ -367,7 +367,7 @@ def generate_deserialize_cdr(fields: list[Field], endianess: str) -> CDRDeser:
         elif desc.valtype == Valtype.ARRAY:
             subdesc, length = desc.args
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append('  value = []')
                     for idx in range(length):
                         if idx:
@@ -413,7 +413,7 @@ def generate_deserialize_cdr(fields: list[Field], endianess: str) -> CDRDeser:
             subdesc = desc.args[0]
 
             if subdesc.valtype == Valtype.BASE:
-                if subdesc.args == 'string':
+                if subdesc.args[0] == 'string':
                     lines.append('  value = []')
                     lines.append('  for _ in range(size):')
                     lines.append('    pos = (pos + 4 - 1) & -4')

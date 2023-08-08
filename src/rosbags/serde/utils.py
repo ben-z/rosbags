@@ -52,7 +52,7 @@ def align(entry: Descriptor) -> int:
 
     """
     if entry.valtype == Valtype.BASE:
-        if entry.args == 'string':
+        if entry.args[0] == 'string':
             return 4
         return SIZEMAP[entry.args]
     if entry.valtype == Valtype.MESSAGE:
@@ -74,7 +74,7 @@ def align_after(entry: Descriptor) -> int:
 
     """
     if entry.valtype == Valtype.BASE:
-        if entry.args == 'string':
+        if entry.args[0] == 'string':
             return 1
         return SIZEMAP[entry.args]
     if entry.valtype == Valtype.MESSAGE:
