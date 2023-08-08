@@ -49,16 +49,16 @@ def get_msgdef(typename: str, typestore: Typestore) -> Msgdef:
         entries = typestore.FIELDDEFS[typename][1]
 
         def fixup(entry: Fielddesc) -> Descriptor:
-            if entry[0] == Valtype.BASE:
-                assert isinstance(entry[1], str)
+            if entry[0] == int(Valtype.BASE):
+                assert isinstance(entry[1], (str, tuple))
                 return Descriptor(Valtype.BASE, entry[1])
-            if entry[0] == Valtype.MESSAGE:
+            if entry[0] == int(Valtype.MESSAGE):
                 assert isinstance(entry[1], str)
                 return Descriptor(Valtype.MESSAGE, get_msgdef(entry[1], typestore))
-            if entry[0] == Valtype.ARRAY:
+            if entry[0] == int(Valtype.ARRAY):
                 assert not isinstance(entry[1][0], str)
                 return Descriptor(Valtype.ARRAY, (fixup(entry[1][0]), entry[1][1]))
-            if entry[0] == Valtype.SEQUENCE:
+            if entry[0] == int(Valtype.SEQUENCE):
                 assert not isinstance(entry[1][0], str)
                 return Descriptor(Valtype.SEQUENCE, (fixup(entry[1][0]), entry[1][1]))
             raise SerdeError(  # pragma: no cover

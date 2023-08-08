@@ -197,14 +197,17 @@ def test_parse_bounds_msg() -> None:
         'test_msgs/msg/Foo': (
             [],
             [
-                ('unbounded_integer_array', (4, ((1, 'int32'), None))),
+                ('unbounded_integer_array', (4, ((1, 'int32'), 0))),
                 ('five_integers_array', (3, ((1, 'int32'), 5))),
-                ('up_to_five_integers_array', (4, ((1, 'int32'), None))),
-                ('string_of_unbounded_size', (1, 'string')),
-                ('up_to_ten_characters_string', (1, 'string')),
-                ('up_to_five_unbounded_strings', (4, ((1, 'string'), None))),
-                ('unbounded_array_of_string_up_to_ten_characters_each', (4, ((1, 'string'), None))),
-                ('up_to_five_strings_up_to_ten_characters_each', (4, ((1, 'string'), None))),
+                ('up_to_five_integers_array', (4, ((1, 'int32'), 5))),
+                ('string_of_unbounded_size', (1, ('string', 0))),
+                ('up_to_ten_characters_string', (1, ('string', 10))),
+                ('up_to_five_unbounded_strings', (4, ((1, ('string', 0)), 5))),
+                (
+                    'unbounded_array_of_string_up_to_ten_characters_each',
+                    (4, ((1, ('string', 10)), 0)),
+                ),
+                ('up_to_five_strings_up_to_ten_characters_each', (4, ((1, ('string', 10)), 5))),
             ],
         ),
     }
@@ -222,9 +225,9 @@ def test_parse_defaults_msg() -> None:
                 ('o', (1, 'uint8')),
                 ('h', (1, 'uint8')),
                 ('y', (1, 'float32')),
-                ('name1', (1, 'string')),
-                ('name2', (1, 'string')),
-                ('samples', (4, ((1, 'int32'), None))),
+                ('name1', (1, ('string', 0))),
+                ('name2', (1, ('string', 0))),
+                ('samples', (4, ((1, 'int32'), 0))),
             ],
         ),
     }
@@ -249,10 +252,10 @@ def test_parse_msg() -> None:
     assert fields[1][1][1] == 'std_msgs/msg/Bool'
     assert fields[2][0] == 'sibling'
     assert fields[2][1][1] == 'test_msgs/msg/Bar'
-    assert fields[3][1][0] == Nodetype.BASE
-    assert fields[4][1][0] == Nodetype.SEQUENCE
-    assert fields[5][1][0] == Nodetype.SEQUENCE
-    assert fields[6][1][0] == Nodetype.ARRAY
+    assert fields[3][1][0] == int(Nodetype.BASE)
+    assert fields[4][1][0] == int(Nodetype.SEQUENCE)
+    assert fields[5][1][0] == int(Nodetype.SEQUENCE)
+    assert fields[6][1][0] == int(Nodetype.ARRAY)
 
 
 def test_parse_multi_msg() -> None:
@@ -279,7 +282,7 @@ def test_parse_cstring_confusion() -> None:
     consts, fields = ret['test_msgs/msg/Foo']
     assert consts == []
     assert fields[0][1][1] == 'std_msgs/msg/Header'
-    assert fields[1][1][1] == 'string'
+    assert fields[1][1][1] == ('string', 0)
 
 
 def test_parse_relative_siblings_msg() -> None:
@@ -316,10 +319,10 @@ def test_parse_idl() -> None:
     assert fields[1][1][1] == 'std_msgs/msg/Bool'
     assert fields[2][0] == 'sibling'
     assert fields[2][1][1] == 'test_msgs/msg/Bar'
-    assert fields[3][1][0] == Nodetype.BASE
-    assert fields[4][1][0] == Nodetype.SEQUENCE
-    assert fields[5][1][0] == Nodetype.SEQUENCE
-    assert fields[6][1][0] == Nodetype.ARRAY
+    assert fields[3][1][0] == int(Nodetype.BASE)
+    assert fields[4][1][0] == int(Nodetype.SEQUENCE)
+    assert fields[5][1][0] == int(Nodetype.SEQUENCE)
+    assert fields[6][1][0] == int(Nodetype.ARRAY)
 
     assert 'test_msgs/Bar' in ret
     consts, fields = ret['test_msgs/Bar']
@@ -333,7 +336,7 @@ def test_parse_idl() -> None:
     assert consts == []
     assert len(fields) == 1
     assert fields[0][0] == 'values'
-    assert fields[0][1] == (Nodetype.ARRAY, ((Nodetype.BASE, 'string'), 3))
+    assert fields[0][1] == (Nodetype.ARRAY, ((Nodetype.BASE, ('string', 0)), 3))
 
 
 def test_parse_idl_does_not_collide_keyword() -> None:
@@ -404,3 +407,7 @@ def test_ros1md5() -> None:
 
     _, digest = generate_msgdef('std_msgs/msg/ByteMultiArray')
     assert digest == '70ea476cbcfd65ac2f68f3cda1e891fe'
+
+    register_types(get_types_from_msg(MSG_BOUNDS, 'test_msgs/msg/Bounds'))
+    _, digest = generate_msgdef('test_msgs/msg/Bounds')
+    assert digest == 'b5a877586c5b2c620b0ee3fa5a0933a0'

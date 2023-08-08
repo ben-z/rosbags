@@ -9,12 +9,15 @@ from enum import IntEnum, auto
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List, Optional, Tuple, Union
+    from typing import Any, Dict, List, Literal, Tuple, Union
 
     from .peg import Visitor
 
+    Basetype = Union[str, Tuple[Literal['string'], int]]
     Constdefs = List[Tuple[str, str, Any]]
-    Fielddesc = Tuple[int, Union[str, Tuple[Tuple[int, str], Optional[int]]]]
+    Fielddesc = Union[Tuple[Literal[1], Basetype], Tuple[Literal[2], str],
+                      Tuple[Literal[3, 4], Tuple[Union[Tuple[Literal[1], Basetype],
+                                                       Tuple[Literal[2], str]], int]]]
     Fielddefs = List[Tuple[str, Fielddesc]]
     Typesdict = Dict[str, Tuple[Constdefs, Fielddefs]]
 

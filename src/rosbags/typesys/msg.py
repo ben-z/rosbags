@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
     T = TypeVar('T')
 
-    StringNode = Tuple[Nodetype, str]
+    StringNode = Tuple[Nodetype, Union[str, Tuple[str, int]]]
     ConstValue = Union[str, bool, int, float]
     Msgdesc = Tuple[Tuple[StringNode, Tuple[str, str, int], str], ...]
     LiteralMatch = Tuple[str, str]
@@ -163,12 +163,13 @@ def normalize_fieldtype(typename: str, field: Fielddesc, names: list[str]) -> Fi
     """
     dct = {Path(name).name: name for name in names}
     ftype, args = field
-    name = args if ftype == Nodetype.NAME else args[0][1]
+    name = args if ftype == int(Nodetype.NAME) else args[0][1]
 
-    assert isinstance(name, str)
-    if name in VisitorMSG.BASETYPES:
+    assert isinstance(name, (str, tuple))
+    if name in VisitorMSG.BASETYPES or name[0] in VisitorMSG.BASETYPES:
         ifield = (Nodetype.BASE, name)
     else:
+        assert isinstance(name, str)
         if name in dct:
             name = dct[name]
         elif name == 'Header':
@@ -179,11 +180,11 @@ def normalize_fieldtype(typename: str, field: Fielddesc, names: list[str]) -> Fi
             name = str((path := Path(name)).parent / 'msg' / path.name)
         ifield = (Nodetype.NAME, name)
 
-    if ftype == Nodetype.NAME:
-        return ifield
+    if ftype == int(Nodetype.NAME):
+        return ifield  # type: ignore
 
     assert not isinstance(args, str)
-    return (ftype, (ifield, args[1]))
+    return (ftype, (ifield, args[1]))  # type: ignore
 
 
 def denormalize_msgtype(typename: str) -> str:
@@ -232,6 +233,8 @@ class VisitorMSG(Visitor):
             value = children[3].strip()
         else:
             value = children[3]
+        assert isinstance(typ, str)
+        assert isinstance(children[1][1], str)
         return (Nodetype.CONST, ''), (typ, children[1][1], value)
 
     def visit_specification(
@@ -250,9 +253,14 @@ class VisitorMSG(Visitor):
                 if x[0] == (Nodetype.CONST, '')
             ]
             fields: Fielddefs = [
-                (normalize_fieldname(field[1][1]), normalize_fieldtype(name, field[0], names))
-                for field in items
-                if field[0] != (Nodetype.CONST, '')
+                (
+                    normalize_fieldname(field[1][1]),
+                    normalize_fieldtype(
+                        name,
+                        field[0],  # type: ignore
+                        names,
+                    ),
+                ) for field in items if field[0] != (Nodetype.CONST, '')
             ]
             res[name] = consts, fields
         return res
@@ -263,6 +271,7 @@ class VisitorMSG(Visitor):
     ) -> tuple[str, tuple[T, ...]]:
         """Process single message definition."""
         assert len(children) == 3
+        assert isinstance(children[1][1], str)
         return normalize_msgtype(children[1][1]), tuple(x for x in children[2] if x is not None)
 
     def visit_msgsep(self, _: str) -> None:
@@ -271,18 +280,18 @@ class VisitorMSG(Visitor):
     def visit_array_type_spec(
         self,
         children: tuple[StringNode, tuple[LiteralMatch, tuple[int, ...], LiteralMatch]],
-    ) -> tuple[Nodetype, tuple[StringNode, Optional[int]]]:
+    ) -> tuple[Nodetype, tuple[StringNode, int]]:
         """Process array type specifier."""
         if length := children[1][1]:
             return Nodetype.ARRAY, (children[0], length[0])
-        return Nodetype.SEQUENCE, (children[0], None)
+        return Nodetype.SEQUENCE, (children[0], 0)
 
     def visit_bounded_array_type_spec(
         self,
-        children: list[StringNode],
-    ) -> tuple[Nodetype, tuple[StringNode, None]]:
+        children: tuple[StringNode, tuple[StringNode, int, StringNode]],
+    ) -> tuple[Nodetype, tuple[StringNode, int]]:
         """Process bounded array type specifier."""
-        return Nodetype.SEQUENCE, (children[0], None)
+        return Nodetype.SEQUENCE, (children[0], children[1][1])
 
     def visit_simple_type_spec(
         self,
@@ -292,15 +301,16 @@ class VisitorMSG(Visitor):
         if len(children) > 2:
             assert (Rule.LIT, '<=') in children
             assert isinstance(children[0], tuple)
-            typespec = children[0][1]
-        else:
-            assert isinstance(children[1], str)
-            typespec = children[1]
-        dct = {
+            assert isinstance(children[2], int)
+            return Nodetype.NAME, (children[0][1], children[2])
+        typespec = children[1]
+        assert isinstance(typespec, str)
+        dct: dict[str, Union[str, tuple[str, int]]] = {
             'time': 'builtin_interfaces/msg/Time',
             'duration': 'builtin_interfaces/msg/Duration',
             'byte': 'octet',
             'char': 'uint8',
+            'string': ('string', 0),
         }
         return Nodetype.NAME, dct.get(typespec, typespec)
 
@@ -380,6 +390,7 @@ def gendefhash(
     """
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     typemap = {
         'builtin_interfaces/msg/Time': 'time',
         'builtin_interfaces/msg/Duration': 'duration',
@@ -395,14 +406,21 @@ def gendefhash(
         deftext.append(f'{typ} {name}={value}')
         hashtext.append(f'{typ} {name}={value}')
 
-    for name, (ftype, args) in typestore.FIELDDEFS[typename][1]:
+    for name, desc in typestore.FIELDDEFS[typename][1]:
         name = name.rstrip('_')
-        if ftype == Nodetype.BASE:
+        if desc[0] == int(Nodetype.BASE):
+            args = desc[1]
             if args == 'octet':
                 args = 'byte'
+            elif args[0] == 'string':
+                if args[1]:
+                    args = f'string<={args[1]}'
+                else:
+                    args = 'string'
             deftext.append(f'{args} {name}')
             hashtext.append(f'{args} {name}')
-        elif ftype == Nodetype.NAME:
+        elif desc[0] == int(Nodetype.NAME):
+            args = desc[1]
             assert isinstance(args, str)
             subname = args
             if subname in typemap:
@@ -415,24 +433,32 @@ def gendefhash(
                 deftext.append(f'{denormalize_msgtype(subname)} {name}')
                 hashtext.append(f'{subdefs[subname][1]} {name}')
         else:
-            assert isinstance(args, tuple)
-            subdesc, num = args
-            count = '' if num is None else str(num)
-            subtype, subname = subdesc
-            if subtype == Nodetype.BASE:
-                if subname == 'octet':
-                    subname = 'byte'
-                deftext.append(f'{subname}[{count}] {name}')
-                hashtext.append(f'{subname}[{count}] {name}')
-            elif subname in typemap:
-                deftext.append(f'{typemap[subname]}[{count}] {name}')
-                hashtext.append(f'{typemap[subname]}[{count}] {name}')
+            assert desc[0] == 3 or desc[0] == 4
+            assert isinstance(desc[1], tuple)
+            subdesc, num = desc[1]
+            isubtype, isubname = subdesc
+            count = '' if num == 0 else str(num) if desc[0] == int(Nodetype.ARRAY) else f'<={num}'
+            if isubtype == int(Nodetype.BASE):
+                if isubname == 'octet':
+                    isubname = 'byte'
+                elif isubname[0] == 'string':
+                    if isubname[1]:
+                        isubname = f'string<={isubname[1]}'
+                    else:
+                        isubname = 'string'
+                deftext.append(f'{isubname}[{count}] {name}')
+                hashtext.append(f'{isubname}[{count}] {name}')
+            elif isubname in typemap:
+                assert isinstance(isubname, str)
+                deftext.append(f'{typemap[isubname]}[{count}] {name}')
+                hashtext.append(f'{typemap[isubname]}[{count}] {name}')
             else:
-                if subname not in subdefs:
-                    subdefs[subname] = ('', '')
-                    subdefs[subname] = gendefhash(subname, subdefs, typestore)
-                deftext.append(f'{denormalize_msgtype(subname)}[{count}] {name}')
-                hashtext.append(f'{subdefs[subname][1]} {name}')
+                assert isinstance(isubname, str)
+                if isubname not in subdefs:
+                    subdefs[isubname] = ('', '')
+                    subdefs[isubname] = gendefhash(isubname, subdefs, typestore)
+                deftext.append(f'{denormalize_msgtype(isubname)}[{count}] {name}')
+                hashtext.append(f'{subdefs[isubname][1]} {name}')
 
     if typename == 'std_msgs/msg/Header':
         deftext.insert(0, 'uint32 seq')

@@ -109,7 +109,7 @@ def deserialize_array(rawdata: bytes, bmap: BasetypeMap, pos: int, num: int, des
 
     """
     if desc.valtype == Valtype.BASE:
-        if desc.args == 'string':
+        if desc.args[0] == 'string':
             strs = []
             while (num := num - 1) >= 0:
                 val, pos = deserialize_string(rawdata, bmap, pos)
@@ -155,7 +155,7 @@ def deserialize_message(rawdata: bytes, bmap: BasetypeMap, pos: int, msgdef: Msg
             values.append(obj)
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 val, pos = deserialize_string(rawdata, bmap, pos)
                 values.append(val)
             else:
@@ -272,7 +272,7 @@ def serialize_array(
 
     """
     if desc.valtype == Valtype.BASE:
-        if desc.args == 'string':
+        if desc.args[0] == 'string':
             for item in val:
                 pos = serialize_string(rawdata, bmap, pos, cast('str', item))
             return pos
@@ -320,7 +320,7 @@ def serialize_message(
             pos = serialize_message(rawdata, bmap, pos, val, desc.args)
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 pos = serialize_string(rawdata, bmap, pos, val)
             else:
                 pos = serialize_number(rawdata, bmap, pos, desc.args, val)
@@ -352,7 +352,7 @@ def get_array_size(desc: Descriptor, val: Array, size: int) -> int:
 
     """
     if desc.valtype == Valtype.BASE:
-        if desc.args == 'string':
+        if desc.args[0] == 'string':
             for item in val:
                 size = (size + 4 - 1) & -4
                 size += 4 + len(item) + 1
@@ -391,7 +391,7 @@ def get_size(message: object, msgdef: Msgdef, size: int = 0) -> int:
             size = get_size(val, desc.args, size)
 
         elif desc.valtype == Valtype.BASE:
-            if desc.args == 'string':
+            if desc.args[0] == 'string':
                 size = (size + 4 - 1) & -4
                 size += 4 + len(val.encode()) + 1
             else:

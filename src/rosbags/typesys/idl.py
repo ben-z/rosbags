@@ -12,7 +12,7 @@ Grammar, parse tree visitor and conversion functions for message definitions in
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from .base import Nodetype, normalize_fieldname, parse_message_definition
 from .peg import Visitor, parse_grammar
@@ -368,17 +368,16 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
         assert len(children) == 2
         dclchildren = children[1]
         assert len(dclchildren) == 2
-        base: Fielddesc
-        value: Fielddesc
-        base = typedef if (typedef := self.typedefs.get(dclchildren[0][1])) else dclchildren[0]
+        base = self.typedefs.get(dclchildren[0][1], cast('Fielddesc', dclchildren[0]))
         flat = [dclchildren[1][0], *[x[1:][0] for x in dclchildren[1][1]]]
         for declarator in flat:
             if declarator[0] == Nodetype.ADECLARATOR:
                 typ, name = base
                 assert isinstance(typ, Nodetype)
-                assert isinstance(name, str)
-                assert isinstance(declarator[2][1], int)
-                value = (Nodetype.ARRAY, ((typ, name), declarator[2][1]))
+                assert isinstance(name, (str, tuple))
+                count = declarator[2][1]
+                assert isinstance(count, int)
+                value = cast('Fielddesc', (Nodetype.ARRAY, ((typ, name), count)))
             else:
                 value = base
             self.typedefs[declarator[1][1]] = value
@@ -388,13 +387,16 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
         children: Union[tuple[LiteralMatch, LiteralMatch, StringNode, LiteralMatch],
                         tuple[LiteralMatch, LiteralMatch, StringNode, LiteralMatch, LiteralNode,
                               LiteralMatch]],
-    ) -> tuple[Nodetype, tuple[StringNode, None]]:
+    ) -> tuple[Nodetype, tuple[StringNode, int]]:
         """Process sequence type specification."""
         assert len(children) in {4, 6}
         if len(children) == 6:
             idx = len(children) - 2
             assert children[idx][0] == Nodetype.LITERAL_NUMBER
-        return (Nodetype.SEQUENCE, (children[2], None))
+            count = children[idx][1]
+            assert isinstance(count, int)
+            return (Nodetype.SEQUENCE, (children[2], count))
+        return (Nodetype.SEQUENCE, (children[2], 0))
 
     # yapf: disable
     def create_struct_field(
@@ -417,7 +419,7 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
         flat = [params[0], *[x[1:][0] for x in params[1]]]
 
         def resolve_name(name: Fielddesc) -> Fielddesc:
-            while name[0] == Nodetype.NAME and name[1] in self.typedefs:
+            while name[0] == int(Nodetype.NAME) and name[1] in self.typedefs:
                 assert isinstance(name[1], str)
                 name = self.typedefs[name[1]]
             return name
@@ -494,14 +496,15 @@ class VisitorIDL(Visitor):  # pylint: disable=too-many-public-methods
     def visit_string_type(
         self,
         children: Union[str, tuple[LiteralMatch, LiteralMatch, LiteralNode, LiteralMatch]],
-    ) -> Union[StringNode, tuple[Nodetype, str, LiteralNode]]:
+    ) -> Union[StringNode, tuple[Nodetype, tuple[str, int]]]:
         """Prrocess string type specifier."""
         if isinstance(children, str):
-            return (Nodetype.BASE, 'string')
+            return (Nodetype.BASE, ('string', 0))
 
         assert len(children) == 4
         assert isinstance(children[0], tuple)
-        return (Nodetype.BASE, 'string', children[2])
+        assert isinstance(children[2][1], int)
+        return (Nodetype.BASE, ('string', children[2][1]))
 
     def visit_scoped_name(
         self,
