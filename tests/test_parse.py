@@ -10,9 +10,9 @@ from rosbags.typesys import (
     get_types_from_idl,
     get_types_from_msg,
     register_types,
+    types,
 )
 from rosbags.typesys.base import Nodetype
-from rosbags.typesys.types import FIELDDEFS
 
 MSG = """
 # comment
@@ -346,13 +346,13 @@ def test_parse_idl_does_not_collide_keyword() -> None:
 
 def test_register_types() -> None:
     """Test type registeration."""
-    assert 'foo' not in FIELDDEFS
+    assert 'foo' not in types.FIELDDEFS
     register_types({})
     register_types({'foo': [[], [('b', (1, 'bool'))]]})  # type: ignore
-    assert 'foo' in FIELDDEFS
+    assert 'foo' in types.FIELDDEFS
 
     register_types({'std_msgs/msg/Header': [[], []]})  # type: ignore
-    assert len(FIELDDEFS['std_msgs/msg/Header'][1]) == 2
+    assert len(types.FIELDDEFS['std_msgs/msg/Header'][1]) == 2
 
     with pytest.raises(TypesysError, match='different definition'):
         register_types({'foo': [[], [('x', (1, 'bool'))]]})  # type: ignore
