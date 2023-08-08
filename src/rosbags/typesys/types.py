@@ -583,7 +583,7 @@ class rcl_interfaces__msg__ParameterEventDescriptors:
 class rcl_interfaces__msg__ParameterType:
     """Class for rcl_interfaces/msg/ParameterType."""
 
-    structure_needs_at_least_one_member: int
+    structure_needs_at_least_one_member: int = 0
     PARAMETER_NOT_SET: ClassVar[int] = 0
     PARAMETER_BOOL: ClassVar[int] = 1
     PARAMETER_INTEGER: ClassVar[int] = 2
@@ -1104,7 +1104,7 @@ class statistics_msgs__msg__StatisticDataPoint:
 class statistics_msgs__msg__StatisticDataType:
     """Class for statistics_msgs/msg/StatisticDataType."""
 
-    structure_needs_at_least_one_member: int
+    structure_needs_at_least_one_member: int = 0
     STATISTICS_DATA_TYPE_UNINITIALIZED: ClassVar[int] = 0
     STATISTICS_DATA_TYPE_AVERAGE: ClassVar[int] = 1
     STATISTICS_DATA_TYPE_MINIMUM: ClassVar[int] = 2
@@ -1162,7 +1162,7 @@ class std_msgs__msg__ColorRGBA:
 class std_msgs__msg__Empty:
     """Class for std_msgs/msg/Empty."""
 
-    structure_needs_at_least_one_member: int
+    structure_needs_at_least_one_member: int = 0
     __msgtype__: ClassVar[str] = 'std_msgs/msg/Empty'
 
 
@@ -1668,29 +1668,29 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('status', (4, ((2, 'diagnostic_msgs/msg/DiagnosticStatus'), None))),
+            ('status', (4, ((2, 'diagnostic_msgs/msg/DiagnosticStatus'), 0))),
         ],
     ),
     'diagnostic_msgs/msg/DiagnosticStatus': (
         [
-            ('OK', 'uint8', 0),
-            ('WARN', 'uint8', 1),
-            ('ERROR', 'uint8', 2),
-            ('STALE', 'uint8', 3),
+            ('OK', 'octet', 0),
+            ('WARN', 'octet', 1),
+            ('ERROR', 'octet', 2),
+            ('STALE', 'octet', 3),
         ],
         [
-            ('level', (1, 'uint8')),
-            ('name', (1, 'string')),
-            ('message', (1, 'string')),
-            ('hardware_id', (1, 'string')),
-            ('values', (4, ((2, 'diagnostic_msgs/msg/KeyValue'), None))),
+            ('level', (1, 'octet')),
+            ('name', (1, ('string', 0))),
+            ('message', (1, ('string', 0))),
+            ('hardware_id', (1, ('string', 0))),
+            ('values', (4, ((2, 'diagnostic_msgs/msg/KeyValue'), 0))),
         ],
     ),
     'diagnostic_msgs/msg/KeyValue': (
         [],
         [
-            ('key', (1, 'string')),
-            ('value', (1, 'string')),
+            ('key', (1, ('string', 0))),
+            ('value', (1, ('string', 0))),
         ],
     ),
     'geometry_msgs/msg/Accel': (
@@ -1767,7 +1767,7 @@ FIELDDEFS: Typesdict = {
     'geometry_msgs/msg/Polygon': (
         [],
         [
-            ('points', (4, ((2, 'geometry_msgs/msg/Point32'), None))),
+            ('points', (4, ((2, 'geometry_msgs/msg/Point32'), 0))),
         ],
     ),
     'geometry_msgs/msg/PolygonStamped': (
@@ -1796,7 +1796,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('poses', (4, ((2, 'geometry_msgs/msg/Pose'), None))),
+            ('poses', (4, ((2, 'geometry_msgs/msg/Pose'), 0))),
         ],
     ),
     'geometry_msgs/msg/PoseStamped': (
@@ -1847,7 +1847,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('child_frame_id', (1, 'string')),
+            ('child_frame_id', (1, ('string', 0))),
             ('transform', (2, 'geometry_msgs/msg/Transform')),
         ],
     ),
@@ -1930,7 +1930,7 @@ FIELDDEFS: Typesdict = {
         ],
         [
             ('id', (1, 'uint8')),
-            ('label', (1, 'string')),
+            ('label', (1, ('string', 0))),
         ],
     ),
     'lifecycle_msgs/msg/Transition': (
@@ -1968,7 +1968,7 @@ FIELDDEFS: Typesdict = {
         ],
         [
             ('id', (1, 'uint8')),
-            ('label', (1, 'string')),
+            ('label', (1, ('string', 0))),
         ],
     ),
     'lifecycle_msgs/msg/TransitionDescription': (
@@ -1994,7 +1994,7 @@ FIELDDEFS: Typesdict = {
             ('header', (2, 'std_msgs/msg/Header')),
             ('cell_width', (1, 'float32')),
             ('cell_height', (1, 'float32')),
-            ('cells', (4, ((2, 'geometry_msgs/msg/Point'), None))),
+            ('cells', (4, ((2, 'geometry_msgs/msg/Point'), 0))),
         ],
     ),
     'nav_msgs/msg/MapMetaData': (
@@ -2012,14 +2012,14 @@ FIELDDEFS: Typesdict = {
         [
             ('header', (2, 'std_msgs/msg/Header')),
             ('info', (2, 'nav_msgs/msg/MapMetaData')),
-            ('data', (4, ((1, 'int8'), None))),
+            ('data', (4, ((1, 'int8'), 0))),
         ],
     ),
     'nav_msgs/msg/Odometry': (
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('child_frame_id', (1, 'string')),
+            ('child_frame_id', (1, ('string', 0))),
             ('pose', (2, 'geometry_msgs/msg/PoseWithCovariance')),
             ('twist', (2, 'geometry_msgs/msg/TwistWithCovariance')),
         ],
@@ -2028,7 +2028,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('poses', (4, ((2, 'geometry_msgs/msg/PoseStamped'), None))),
+            ('poses', (4, ((2, 'geometry_msgs/msg/PoseStamped'), 0))),
         ],
     ),
     'rcl_interfaces/msg/FloatingPointRange': (
@@ -2050,63 +2050,63 @@ FIELDDEFS: Typesdict = {
     'rcl_interfaces/msg/ListParametersResult': (
         [],
         [
-            ('names', (4, ((1, 'string'), None))),
-            ('prefixes', (4, ((1, 'string'), None))),
+            ('names', (4, ((1, ('string', 0)), 0))),
+            ('prefixes', (4, ((1, ('string', 0)), 0))),
         ],
     ),
     'rcl_interfaces/msg/Log': (
         [
-            ('DEBUG', 'uint8', 10),
-            ('INFO', 'uint8', 20),
-            ('WARN', 'uint8', 30),
-            ('ERROR', 'uint8', 40),
-            ('FATAL', 'uint8', 50),
+            ('DEBUG', 'octet', 10),
+            ('INFO', 'octet', 20),
+            ('WARN', 'octet', 30),
+            ('ERROR', 'octet', 40),
+            ('FATAL', 'octet', 50),
         ],
         [
             ('stamp', (2, 'builtin_interfaces/msg/Time')),
             ('level', (1, 'uint8')),
-            ('name', (1, 'string')),
-            ('msg', (1, 'string')),
-            ('file', (1, 'string')),
-            ('function', (1, 'string')),
+            ('name', (1, ('string', 0))),
+            ('msg', (1, ('string', 0))),
+            ('file', (1, ('string', 0))),
+            ('function', (1, ('string', 0))),
             ('line', (1, 'uint32')),
         ],
     ),
     'rcl_interfaces/msg/Parameter': (
         [],
         [
-            ('name', (1, 'string')),
+            ('name', (1, ('string', 0))),
             ('value', (2, 'rcl_interfaces/msg/ParameterValue')),
         ],
     ),
     'rcl_interfaces/msg/ParameterDescriptor': (
         [],
         [
-            ('name', (1, 'string')),
+            ('name', (1, ('string', 0))),
             ('type', (1, 'uint8')),
-            ('description', (1, 'string')),
-            ('additional_constraints', (1, 'string')),
+            ('description', (1, ('string', 0))),
+            ('additional_constraints', (1, ('string', 0))),
             ('read_only', (1, 'bool')),
-            ('floating_point_range', (4, ((2, 'rcl_interfaces/msg/FloatingPointRange'), None))),
-            ('integer_range', (4, ((2, 'rcl_interfaces/msg/IntegerRange'), None))),
+            ('floating_point_range', (4, ((2, 'rcl_interfaces/msg/FloatingPointRange'), 1))),
+            ('integer_range', (4, ((2, 'rcl_interfaces/msg/IntegerRange'), 1))),
         ],
     ),
     'rcl_interfaces/msg/ParameterEvent': (
         [],
         [
             ('stamp', (2, 'builtin_interfaces/msg/Time')),
-            ('node', (1, 'string')),
-            ('new_parameters', (4, ((2, 'rcl_interfaces/msg/Parameter'), None))),
-            ('changed_parameters', (4, ((2, 'rcl_interfaces/msg/Parameter'), None))),
-            ('deleted_parameters', (4, ((2, 'rcl_interfaces/msg/Parameter'), None))),
+            ('node', (1, ('string', 0))),
+            ('new_parameters', (4, ((2, 'rcl_interfaces/msg/Parameter'), 0))),
+            ('changed_parameters', (4, ((2, 'rcl_interfaces/msg/Parameter'), 0))),
+            ('deleted_parameters', (4, ((2, 'rcl_interfaces/msg/Parameter'), 0))),
         ],
     ),
     'rcl_interfaces/msg/ParameterEventDescriptors': (
         [],
         [
-            ('new_parameters', (4, ((2, 'rcl_interfaces/msg/ParameterDescriptor'), None))),
-            ('changed_parameters', (4, ((2, 'rcl_interfaces/msg/ParameterDescriptor'), None))),
-            ('deleted_parameters', (4, ((2, 'rcl_interfaces/msg/ParameterDescriptor'), None))),
+            ('new_parameters', (4, ((2, 'rcl_interfaces/msg/ParameterDescriptor'), 0))),
+            ('changed_parameters', (4, ((2, 'rcl_interfaces/msg/ParameterDescriptor'), 0))),
+            ('deleted_parameters', (4, ((2, 'rcl_interfaces/msg/ParameterDescriptor'), 0))),
         ],
     ),
     'rcl_interfaces/msg/ParameterType': (
@@ -2133,19 +2133,19 @@ FIELDDEFS: Typesdict = {
             ('bool_value', (1, 'bool')),
             ('integer_value', (1, 'int64')),
             ('double_value', (1, 'float64')),
-            ('string_value', (1, 'string')),
-            ('byte_array_value', (4, ((1, 'uint8'), None))),
-            ('bool_array_value', (4, ((1, 'bool'), None))),
-            ('integer_array_value', (4, ((1, 'int64'), None))),
-            ('double_array_value', (4, ((1, 'float64'), None))),
-            ('string_array_value', (4, ((1, 'string'), None))),
+            ('string_value', (1, ('string', 0))),
+            ('byte_array_value', (4, ((1, 'octet'), 0))),
+            ('bool_array_value', (4, ((1, 'bool'), 0))),
+            ('integer_array_value', (4, ((1, 'int64'), 0))),
+            ('double_array_value', (4, ((1, 'float64'), 0))),
+            ('string_array_value', (4, ((1, ('string', 0)), 0))),
         ],
     ),
     'rcl_interfaces/msg/SetParametersResult': (
         [],
         [
             ('successful', (1, 'bool')),
-            ('reason', (1, 'string')),
+            ('reason', (1, ('string', 0))),
         ],
     ),
     'rmw_dds_common/msg/Gid': (
@@ -2157,17 +2157,17 @@ FIELDDEFS: Typesdict = {
     'rmw_dds_common/msg/NodeEntitiesInfo': (
         [],
         [
-            ('node_namespace', (1, 'string')),
-            ('node_name', (1, 'string')),
-            ('reader_gid_seq', (4, ((2, 'rmw_dds_common/msg/Gid'), None))),
-            ('writer_gid_seq', (4, ((2, 'rmw_dds_common/msg/Gid'), None))),
+            ('node_namespace', (1, ('string', 256))),
+            ('node_name', (1, ('string', 256))),
+            ('reader_gid_seq', (4, ((2, 'rmw_dds_common/msg/Gid'), 0))),
+            ('writer_gid_seq', (4, ((2, 'rmw_dds_common/msg/Gid'), 0))),
         ],
     ),
     'rmw_dds_common/msg/ParticipantEntitiesInfo': (
         [],
         [
             ('gid', (2, 'rmw_dds_common/msg/Gid')),
-            ('node_entities_info_seq', (4, ((2, 'rmw_dds_common/msg/NodeEntitiesInfo'), None))),
+            ('node_entities_info_seq', (4, ((2, 'rmw_dds_common/msg/NodeEntitiesInfo'), 0))),
         ],
     ),
     'rosgraph_msgs/msg/Clock': (
@@ -2213,10 +2213,10 @@ FIELDDEFS: Typesdict = {
             ('power_supply_health', (1, 'uint8')),
             ('power_supply_technology', (1, 'uint8')),
             ('present', (1, 'bool')),
-            ('cell_voltage', (4, ((1, 'float32'), None))),
-            ('cell_temperature', (4, ((1, 'float32'), None))),
-            ('location', (1, 'string')),
-            ('serial_number', (1, 'string')),
+            ('cell_voltage', (4, ((1, 'float32'), 0))),
+            ('cell_temperature', (4, ((1, 'float32'), 0))),
+            ('location', (1, ('string', 0))),
+            ('serial_number', (1, ('string', 0))),
         ],
     ),
     'sensor_msgs/msg/CameraInfo': (
@@ -2225,8 +2225,8 @@ FIELDDEFS: Typesdict = {
             ('header', (2, 'std_msgs/msg/Header')),
             ('height', (1, 'uint32')),
             ('width', (1, 'uint32')),
-            ('distortion_model', (1, 'string')),
-            ('d', (4, ((1, 'float64'), None))),
+            ('distortion_model', (1, ('string', 0))),
+            ('d', (4, ((1, 'float64'), 0))),
             ('k', (3, ((1, 'float64'), 9))),
             ('r', (3, ((1, 'float64'), 9))),
             ('p', (3, ((1, 'float64'), 12))),
@@ -2238,16 +2238,16 @@ FIELDDEFS: Typesdict = {
     'sensor_msgs/msg/ChannelFloat32': (
         [],
         [
-            ('name', (1, 'string')),
-            ('values', (4, ((1, 'float32'), None))),
+            ('name', (1, ('string', 0))),
+            ('values', (4, ((1, 'float32'), 0))),
         ],
     ),
     'sensor_msgs/msg/CompressedImage': (
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('format', (1, 'string')),
-            ('data', (4, ((1, 'uint8'), None))),
+            ('format', (1, ('string', 0))),
+            ('data', (4, ((1, 'uint8'), 0))),
         ],
     ),
     'sensor_msgs/msg/FluidPressure': (
@@ -2272,10 +2272,10 @@ FIELDDEFS: Typesdict = {
             ('header', (2, 'std_msgs/msg/Header')),
             ('height', (1, 'uint32')),
             ('width', (1, 'uint32')),
-            ('encoding', (1, 'string')),
+            ('encoding', (1, ('string', 0))),
             ('is_bigendian', (1, 'uint8')),
             ('step', (1, 'uint32')),
-            ('data', (4, ((1, 'uint8'), None))),
+            ('data', (4, ((1, 'uint8'), 0))),
         ],
     ),
     'sensor_msgs/msg/Imu': (
@@ -2294,18 +2294,18 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('name', (4, ((1, 'string'), None))),
-            ('position', (4, ((1, 'float64'), None))),
-            ('velocity', (4, ((1, 'float64'), None))),
-            ('effort', (4, ((1, 'float64'), None))),
+            ('name', (4, ((1, ('string', 0)), 0))),
+            ('position', (4, ((1, 'float64'), 0))),
+            ('velocity', (4, ((1, 'float64'), 0))),
+            ('effort', (4, ((1, 'float64'), 0))),
         ],
     ),
     'sensor_msgs/msg/Joy': (
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('axes', (4, ((1, 'float32'), None))),
-            ('buttons', (4, ((1, 'int32'), None))),
+            ('axes', (4, ((1, 'float32'), 0))),
+            ('buttons', (4, ((1, 'int32'), 0))),
         ],
     ),
     'sensor_msgs/msg/JoyFeedback': (
@@ -2323,13 +2323,13 @@ FIELDDEFS: Typesdict = {
     'sensor_msgs/msg/JoyFeedbackArray': (
         [],
         [
-            ('array', (4, ((2, 'sensor_msgs/msg/JoyFeedback'), None))),
+            ('array', (4, ((2, 'sensor_msgs/msg/JoyFeedback'), 0))),
         ],
     ),
     'sensor_msgs/msg/LaserEcho': (
         [],
         [
-            ('echoes', (4, ((1, 'float32'), None))),
+            ('echoes', (4, ((1, 'float32'), 0))),
         ],
     ),
     'sensor_msgs/msg/LaserScan': (
@@ -2343,8 +2343,8 @@ FIELDDEFS: Typesdict = {
             ('scan_time', (1, 'float32')),
             ('range_min', (1, 'float32')),
             ('range_max', (1, 'float32')),
-            ('ranges', (4, ((1, 'float32'), None))),
-            ('intensities', (4, ((1, 'float32'), None))),
+            ('ranges', (4, ((1, 'float32'), 0))),
+            ('intensities', (4, ((1, 'float32'), 0))),
         ],
     ),
     'sensor_msgs/msg/MagneticField': (
@@ -2359,10 +2359,10 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('joint_names', (4, ((1, 'string'), None))),
-            ('transforms', (4, ((2, 'geometry_msgs/msg/Transform'), None))),
-            ('twist', (4, ((2, 'geometry_msgs/msg/Twist'), None))),
-            ('wrench', (4, ((2, 'geometry_msgs/msg/Wrench'), None))),
+            ('joint_names', (4, ((1, ('string', 0)), 0))),
+            ('transforms', (4, ((2, 'geometry_msgs/msg/Transform'), 0))),
+            ('twist', (4, ((2, 'geometry_msgs/msg/Twist'), 0))),
+            ('wrench', (4, ((2, 'geometry_msgs/msg/Wrench'), 0))),
         ],
     ),
     'sensor_msgs/msg/MultiEchoLaserScan': (
@@ -2376,8 +2376,8 @@ FIELDDEFS: Typesdict = {
             ('scan_time', (1, 'float32')),
             ('range_min', (1, 'float32')),
             ('range_max', (1, 'float32')),
-            ('ranges', (4, ((2, 'sensor_msgs/msg/LaserEcho'), None))),
-            ('intensities', (4, ((2, 'sensor_msgs/msg/LaserEcho'), None))),
+            ('ranges', (4, ((2, 'sensor_msgs/msg/LaserEcho'), 0))),
+            ('intensities', (4, ((2, 'sensor_msgs/msg/LaserEcho'), 0))),
         ],
     ),
     'sensor_msgs/msg/NavSatFix': (
@@ -2417,8 +2417,8 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('points', (4, ((2, 'geometry_msgs/msg/Point32'), None))),
-            ('channels', (4, ((2, 'sensor_msgs/msg/ChannelFloat32'), None))),
+            ('points', (4, ((2, 'geometry_msgs/msg/Point32'), 0))),
+            ('channels', (4, ((2, 'sensor_msgs/msg/ChannelFloat32'), 0))),
         ],
     ),
     'sensor_msgs/msg/PointCloud2': (
@@ -2427,11 +2427,11 @@ FIELDDEFS: Typesdict = {
             ('header', (2, 'std_msgs/msg/Header')),
             ('height', (1, 'uint32')),
             ('width', (1, 'uint32')),
-            ('fields', (4, ((2, 'sensor_msgs/msg/PointField'), None))),
+            ('fields', (4, ((2, 'sensor_msgs/msg/PointField'), 0))),
             ('is_bigendian', (1, 'bool')),
             ('point_step', (1, 'uint32')),
             ('row_step', (1, 'uint32')),
-            ('data', (4, ((1, 'uint8'), None))),
+            ('data', (4, ((1, 'uint8'), 0))),
             ('is_dense', (1, 'bool')),
         ],
     ),
@@ -2447,7 +2447,7 @@ FIELDDEFS: Typesdict = {
             ('FLOAT64', 'uint8', 8),
         ],
         [
-            ('name', (1, 'string')),
+            ('name', (1, ('string', 0))),
             ('offset', (1, 'uint32')),
             ('datatype', (1, 'uint8')),
             ('count', (1, 'uint32')),
@@ -2498,14 +2498,14 @@ FIELDDEFS: Typesdict = {
         [
             ('header', (2, 'std_msgs/msg/Header')),
             ('time_ref', (2, 'builtin_interfaces/msg/Time')),
-            ('source', (1, 'string')),
+            ('source', (1, ('string', 0))),
         ],
     ),
     'shape_msgs/msg/Mesh': (
         [],
         [
-            ('triangles', (4, ((2, 'shape_msgs/msg/MeshTriangle'), None))),
-            ('vertices', (4, ((2, 'geometry_msgs/msg/Point'), None))),
+            ('triangles', (4, ((2, 'shape_msgs/msg/MeshTriangle'), 0))),
+            ('vertices', (4, ((2, 'geometry_msgs/msg/Point'), 0))),
         ],
     ),
     'shape_msgs/msg/MeshTriangle': (
@@ -2537,18 +2537,18 @@ FIELDDEFS: Typesdict = {
         ],
         [
             ('type', (1, 'uint8')),
-            ('dimensions', (4, ((1, 'float64'), None))),
+            ('dimensions', (4, ((1, 'float64'), 3))),
         ],
     ),
     'statistics_msgs/msg/MetricsMessage': (
         [],
         [
-            ('measurement_source_name', (1, 'string')),
-            ('metrics_source', (1, 'string')),
-            ('unit', (1, 'string')),
+            ('measurement_source_name', (1, ('string', 0))),
+            ('metrics_source', (1, ('string', 0))),
+            ('unit', (1, ('string', 0))),
             ('window_start', (2, 'builtin_interfaces/msg/Time')),
             ('window_stop', (2, 'builtin_interfaces/msg/Time')),
-            ('statistics', (4, ((2, 'statistics_msgs/msg/StatisticDataPoint'), None))),
+            ('statistics', (4, ((2, 'statistics_msgs/msg/StatisticDataPoint'), 0))),
         ],
     ),
     'statistics_msgs/msg/StatisticDataPoint': (
@@ -2580,14 +2580,14 @@ FIELDDEFS: Typesdict = {
     'std_msgs/msg/Byte': (
         [],
         [
-            ('data', (1, 'uint8')),
+            ('data', (1, 'octet')),
         ],
     ),
     'std_msgs/msg/ByteMultiArray': (
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'uint8'), None))),
+            ('data', (4, ((1, 'octet'), 0))),
         ],
     ),
     'std_msgs/msg/Char': (
@@ -2621,7 +2621,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'float32'), None))),
+            ('data', (4, ((1, 'float32'), 0))),
         ],
     ),
     'std_msgs/msg/Float64': (
@@ -2634,14 +2634,14 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'float64'), None))),
+            ('data', (4, ((1, 'float64'), 0))),
         ],
     ),
     'std_msgs/msg/Header': (
         [],
         [
             ('stamp', (2, 'builtin_interfaces/msg/Time')),
-            ('frame_id', (1, 'string')),
+            ('frame_id', (1, ('string', 0))),
         ],
     ),
     'std_msgs/msg/Int16': (
@@ -2654,7 +2654,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'int16'), None))),
+            ('data', (4, ((1, 'int16'), 0))),
         ],
     ),
     'std_msgs/msg/Int32': (
@@ -2667,7 +2667,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'int32'), None))),
+            ('data', (4, ((1, 'int32'), 0))),
         ],
     ),
     'std_msgs/msg/Int64': (
@@ -2680,7 +2680,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'int64'), None))),
+            ('data', (4, ((1, 'int64'), 0))),
         ],
     ),
     'std_msgs/msg/Int8': (
@@ -2693,13 +2693,13 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'int8'), None))),
+            ('data', (4, ((1, 'int8'), 0))),
         ],
     ),
     'std_msgs/msg/MultiArrayDimension': (
         [],
         [
-            ('label', (1, 'string')),
+            ('label', (1, ('string', 0))),
             ('size', (1, 'uint32')),
             ('stride', (1, 'uint32')),
         ],
@@ -2707,14 +2707,14 @@ FIELDDEFS: Typesdict = {
     'std_msgs/msg/MultiArrayLayout': (
         [],
         [
-            ('dim', (4, ((2, 'std_msgs/msg/MultiArrayDimension'), None))),
+            ('dim', (4, ((2, 'std_msgs/msg/MultiArrayDimension'), 0))),
             ('data_offset', (1, 'uint32')),
         ],
     ),
     'std_msgs/msg/String': (
         [],
         [
-            ('data', (1, 'string')),
+            ('data', (1, ('string', 0))),
         ],
     ),
     'std_msgs/msg/UInt16': (
@@ -2727,7 +2727,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'uint16'), None))),
+            ('data', (4, ((1, 'uint16'), 0))),
         ],
     ),
     'std_msgs/msg/UInt32': (
@@ -2740,7 +2740,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'uint32'), None))),
+            ('data', (4, ((1, 'uint32'), 0))),
         ],
     ),
     'std_msgs/msg/UInt64': (
@@ -2753,7 +2753,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'uint64'), None))),
+            ('data', (4, ((1, 'uint64'), 0))),
         ],
     ),
     'std_msgs/msg/UInt8': (
@@ -2766,7 +2766,7 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('layout', (2, 'std_msgs/msg/MultiArrayLayout')),
-            ('data', (4, ((1, 'uint8'), None))),
+            ('data', (4, ((1, 'uint8'), 0))),
         ],
     ),
     'stereo_msgs/msg/DisparityImage': (
@@ -2794,30 +2794,30 @@ FIELDDEFS: Typesdict = {
         ],
         [
             ('error', (1, 'uint8')),
-            ('error_string', (1, 'string')),
+            ('error_string', (1, ('string', 0))),
         ],
     ),
     'tf2_msgs/msg/TFMessage': (
         [],
         [
-            ('transforms', (4, ((2, 'geometry_msgs/msg/TransformStamped'), None))),
+            ('transforms', (4, ((2, 'geometry_msgs/msg/TransformStamped'), 0))),
         ],
     ),
     'trajectory_msgs/msg/JointTrajectory': (
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('joint_names', (4, ((1, 'string'), None))),
-            ('points', (4, ((2, 'trajectory_msgs/msg/JointTrajectoryPoint'), None))),
+            ('joint_names', (4, ((1, ('string', 0)), 0))),
+            ('points', (4, ((2, 'trajectory_msgs/msg/JointTrajectoryPoint'), 0))),
         ],
     ),
     'trajectory_msgs/msg/JointTrajectoryPoint': (
         [],
         [
-            ('positions', (4, ((1, 'float64'), None))),
-            ('velocities', (4, ((1, 'float64'), None))),
-            ('accelerations', (4, ((1, 'float64'), None))),
-            ('effort', (4, ((1, 'float64'), None))),
+            ('positions', (4, ((1, 'float64'), 0))),
+            ('velocities', (4, ((1, 'float64'), 0))),
+            ('accelerations', (4, ((1, 'float64'), 0))),
+            ('effort', (4, ((1, 'float64'), 0))),
             ('time_from_start', (2, 'builtin_interfaces/msg/Duration')),
         ],
     ),
@@ -2825,16 +2825,16 @@ FIELDDEFS: Typesdict = {
         [],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('joint_names', (4, ((1, 'string'), None))),
-            ('points', (4, ((2, 'trajectory_msgs/msg/MultiDOFJointTrajectoryPoint'), None))),
+            ('joint_names', (4, ((1, ('string', 0)), 0))),
+            ('points', (4, ((2, 'trajectory_msgs/msg/MultiDOFJointTrajectoryPoint'), 0))),
         ],
     ),
     'trajectory_msgs/msg/MultiDOFJointTrajectoryPoint': (
         [],
         [
-            ('transforms', (4, ((2, 'geometry_msgs/msg/Transform'), None))),
-            ('velocities', (4, ((2, 'geometry_msgs/msg/Twist'), None))),
-            ('accelerations', (4, ((2, 'geometry_msgs/msg/Twist'), None))),
+            ('transforms', (4, ((2, 'geometry_msgs/msg/Transform'), 0))),
+            ('velocities', (4, ((2, 'geometry_msgs/msg/Twist'), 0))),
+            ('accelerations', (4, ((2, 'geometry_msgs/msg/Twist'), 0))),
             ('time_from_start', (2, 'builtin_interfaces/msg/Duration')),
         ],
     ),
@@ -2856,7 +2856,7 @@ FIELDDEFS: Typesdict = {
         ],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('ns', (1, 'string')),
+            ('ns', (1, ('string', 0))),
             ('id', (1, 'int32')),
             ('type', (1, 'int32')),
             ('action', (1, 'int32')),
@@ -2866,8 +2866,8 @@ FIELDDEFS: Typesdict = {
             ('filled', (1, 'uint8')),
             ('fill_color', (2, 'std_msgs/msg/ColorRGBA')),
             ('lifetime', (2, 'builtin_interfaces/msg/Duration')),
-            ('points', (4, ((2, 'geometry_msgs/msg/Point'), None))),
-            ('outline_colors', (4, ((2, 'std_msgs/msg/ColorRGBA'), None))),
+            ('points', (4, ((2, 'geometry_msgs/msg/Point'), 0))),
+            ('outline_colors', (4, ((2, 'std_msgs/msg/ColorRGBA'), 0))),
         ],
     ),
     'visualization_msgs/msg/InteractiveMarker': (
@@ -2875,11 +2875,11 @@ FIELDDEFS: Typesdict = {
         [
             ('header', (2, 'std_msgs/msg/Header')),
             ('pose', (2, 'geometry_msgs/msg/Pose')),
-            ('name', (1, 'string')),
-            ('description', (1, 'string')),
+            ('name', (1, ('string', 0))),
+            ('description', (1, ('string', 0))),
             ('scale', (1, 'float32')),
-            ('menu_entries', (4, ((2, 'visualization_msgs/msg/MenuEntry'), None))),
-            ('controls', (4, ((2, 'visualization_msgs/msg/InteractiveMarkerControl'), None))),
+            ('menu_entries', (4, ((2, 'visualization_msgs/msg/MenuEntry'), 0))),
+            ('controls', (4, ((2, 'visualization_msgs/msg/InteractiveMarkerControl'), 0))),
         ],
     ),
     'visualization_msgs/msg/InteractiveMarkerControl': (
@@ -2899,14 +2899,14 @@ FIELDDEFS: Typesdict = {
             ('MOVE_ROTATE_3D', 'uint8', 9),
         ],
         [
-            ('name', (1, 'string')),
+            ('name', (1, ('string', 0))),
             ('orientation', (2, 'geometry_msgs/msg/Quaternion')),
             ('orientation_mode', (1, 'uint8')),
             ('interaction_mode', (1, 'uint8')),
             ('always_visible', (1, 'bool')),
-            ('markers', (4, ((2, 'visualization_msgs/msg/Marker'), None))),
+            ('markers', (4, ((2, 'visualization_msgs/msg/Marker'), 0))),
             ('independent_marker_orientation', (1, 'bool')),
-            ('description', (1, 'string')),
+            ('description', (1, ('string', 0))),
         ],
     ),
     'visualization_msgs/msg/InteractiveMarkerFeedback': (
@@ -2920,9 +2920,9 @@ FIELDDEFS: Typesdict = {
         ],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('client_id', (1, 'string')),
-            ('marker_name', (1, 'string')),
-            ('control_name', (1, 'string')),
+            ('client_id', (1, ('string', 0))),
+            ('marker_name', (1, ('string', 0))),
+            ('control_name', (1, ('string', 0))),
             ('event_type', (1, 'uint8')),
             ('pose', (2, 'geometry_msgs/msg/Pose')),
             ('menu_entry_id', (1, 'uint32')),
@@ -2933,9 +2933,9 @@ FIELDDEFS: Typesdict = {
     'visualization_msgs/msg/InteractiveMarkerInit': (
         [],
         [
-            ('server_id', (1, 'string')),
+            ('server_id', (1, ('string', 0))),
             ('seq_num', (1, 'uint64')),
-            ('markers', (4, ((2, 'visualization_msgs/msg/InteractiveMarker'), None))),
+            ('markers', (4, ((2, 'visualization_msgs/msg/InteractiveMarker'), 0))),
         ],
     ),
     'visualization_msgs/msg/InteractiveMarkerPose': (
@@ -2943,7 +2943,7 @@ FIELDDEFS: Typesdict = {
         [
             ('header', (2, 'std_msgs/msg/Header')),
             ('pose', (2, 'geometry_msgs/msg/Pose')),
-            ('name', (1, 'string')),
+            ('name', (1, ('string', 0))),
         ],
     ),
     'visualization_msgs/msg/InteractiveMarkerUpdate': (
@@ -2952,12 +2952,12 @@ FIELDDEFS: Typesdict = {
             ('UPDATE', 'uint8', 1),
         ],
         [
-            ('server_id', (1, 'string')),
+            ('server_id', (1, ('string', 0))),
             ('seq_num', (1, 'uint64')),
             ('type', (1, 'uint8')),
-            ('markers', (4, ((2, 'visualization_msgs/msg/InteractiveMarker'), None))),
-            ('poses', (4, ((2, 'visualization_msgs/msg/InteractiveMarkerPose'), None))),
-            ('erases', (4, ((1, 'string'), None))),
+            ('markers', (4, ((2, 'visualization_msgs/msg/InteractiveMarker'), 0))),
+            ('poses', (4, ((2, 'visualization_msgs/msg/InteractiveMarkerPose'), 0))),
+            ('erases', (4, ((1, ('string', 0)), 0))),
         ],
     ),
     'visualization_msgs/msg/Marker': (
@@ -2981,7 +2981,7 @@ FIELDDEFS: Typesdict = {
         ],
         [
             ('header', (2, 'std_msgs/msg/Header')),
-            ('ns', (1, 'string')),
+            ('ns', (1, ('string', 0))),
             ('id', (1, 'int32')),
             ('type', (1, 'int32')),
             ('action', (1, 'int32')),
@@ -2990,17 +2990,17 @@ FIELDDEFS: Typesdict = {
             ('color', (2, 'std_msgs/msg/ColorRGBA')),
             ('lifetime', (2, 'builtin_interfaces/msg/Duration')),
             ('frame_locked', (1, 'bool')),
-            ('points', (4, ((2, 'geometry_msgs/msg/Point'), None))),
-            ('colors', (4, ((2, 'std_msgs/msg/ColorRGBA'), None))),
-            ('text', (1, 'string')),
-            ('mesh_resource', (1, 'string')),
+            ('points', (4, ((2, 'geometry_msgs/msg/Point'), 0))),
+            ('colors', (4, ((2, 'std_msgs/msg/ColorRGBA'), 0))),
+            ('text', (1, ('string', 0))),
+            ('mesh_resource', (1, ('string', 0))),
             ('mesh_use_embedded_materials', (1, 'bool')),
         ],
     ),
     'visualization_msgs/msg/MarkerArray': (
         [],
         [
-            ('markers', (4, ((2, 'visualization_msgs/msg/Marker'), None))),
+            ('markers', (4, ((2, 'visualization_msgs/msg/Marker'), 0))),
         ],
     ),
     'visualization_msgs/msg/MenuEntry': (
@@ -3012,8 +3012,8 @@ FIELDDEFS: Typesdict = {
         [
             ('id', (1, 'uint32')),
             ('parent_id', (1, 'uint32')),
-            ('title', (1, 'string')),
-            ('command', (1, 'string')),
+            ('title', (1, ('string', 0))),
+            ('command', (1, ('string', 0))),
             ('command_type', (1, 'uint8')),
         ],
     ),
