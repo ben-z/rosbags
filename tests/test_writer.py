@@ -17,12 +17,15 @@ if TYPE_CHECKING:
 
 def test_writer(tmp_path: Path) -> None:
     """Test Writer."""
+    # pylint: disable=too-many-statements
+
     path = tmp_path / 'rosbag2'
     with Writer(path) as bag:
         connection = bag.add_connection('/test', 'std_msgs/msg/Int8')
         bag.write(connection, 42, b'\x00')
         bag.write(connection, 666, b'\x01' * 4096)
     assert (path / 'metadata.yaml').exists()
+    assert 'RIHS01_' in (path / 'metadata.yaml').read_text()
     assert (path / 'rosbag2.db3').exists()
     size = (path / 'rosbag2.db3').stat().st_size
 
@@ -68,6 +71,18 @@ def test_writer(tmp_path: Path) -> None:
     bag.close()
     assert b'key1: value1' in (path / 'metadata.yaml').read_bytes()
 
+    path = tmp_path / 'with_external_types'
+    bag = Writer(path)
+    with bag:
+        connection = bag.add_connection(
+            '/test',
+            'std_msgs/msg/Int8',
+            msgdef='msgdef',
+            rihs01='RIHS00_hash',
+        )
+    assert b'RIHS00' in (path / 'metadata.yaml').read_bytes()
+    assert b'RIHS01' not in (path / 'metadata.yaml').read_bytes()
+
 
 def test_failure_cases(tmp_path: Path) -> None:
     """Test writer failure cases."""
@@ -86,7 +101,7 @@ def test_failure_cases(tmp_path: Path) -> None:
 
     bag = Writer(tmp_path / 'topic')
     with pytest.raises(WriterError, match='was not opened'):
-        bag.add_connection('/tf', 'tf_msgs/msg/tf2')
+        bag.add_connection('/tf', 'tf2_msgs/msg/TFMessage')
 
     bag = Writer(tmp_path / 'write')
     with pytest.raises(WriterError, match='was not opened'):
@@ -94,7 +109,7 @@ def test_failure_cases(tmp_path: Path) -> None:
             Connection(
                 1,
                 '/tf',
-                'tf_msgs/msg/tf2',
+                'tf2_msgs/msg/TFMessage',
                 '',
                 '',
                 0,
@@ -107,9 +122,9 @@ def test_failure_cases(tmp_path: Path) -> None:
 
     bag = Writer(tmp_path / 'topic')
     bag.open()
-    bag.add_connection('/tf', 'tf_msgs/msg/tf2')
+    bag.add_connection('/tf', 'tf2_msgs/msg/TFMessage')
     with pytest.raises(WriterError, match='only be added once'):
-        bag.add_connection('/tf', 'tf_msgs/msg/tf2')
+        bag.add_connection('/tf', 'tf2_msgs/msg/TFMessage')
 
     bag = Writer(tmp_path / 'notopic')
     bag.open()

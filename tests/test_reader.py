@@ -62,7 +62,7 @@ rosbag2_bagfile_information:
 
 METADATA_EMPTY = """
 rosbag2_bagfile_information:
-  version: 6
+  version: 8
   storage_identifier: sqlite3
   relative_file_paths:
     - db.db3
@@ -84,6 +84,7 @@ rosbag2_bagfile_information:
   custom_data:
     key1: value1
     key2: value2
+  ros_distro: rosbags
 """
 
 
@@ -106,16 +107,16 @@ def bag(request: SubRequest, tmp_path: Path) -> Path:
 
     cur = dbh.cursor()
     cur.execute(
-        'INSERT INTO topics VALUES(?, ?, ?, ?, ?)',
-        (1, '/poly', 'geometry_msgs/msg/Polygon', 'cdr', ''),
+        'INSERT INTO topics VALUES(?, ?, ?, ?, ?, ?)',
+        (1, '/poly', 'geometry_msgs/msg/Polygon', 'cdr', '', ''),
     )
     cur.execute(
-        'INSERT INTO topics VALUES(?, ?, ?, ?, ?)',
-        (2, '/magn', 'sensor_msgs/msg/MagneticField', 'cdr', ''),
+        'INSERT INTO topics VALUES(?, ?, ?, ?, ?, ?)',
+        (2, '/magn', 'sensor_msgs/msg/MagneticField', 'cdr', '', ''),
     )
     cur.execute(
-        'INSERT INTO topics VALUES(?, ?, ?, ?, ?)',
-        (3, '/joint', 'trajectory_msgs/msg/JointTrajectory', 'cdr', ''),
+        'INSERT INTO topics VALUES(?, ?, ?, ?, ?, ?)',
+        (3, '/joint', 'trajectory_msgs/msg/JointTrajectory', 'cdr', '', ''),
     )
     cur.execute(
         'INSERT INTO messages VALUES(?, ?, ?, ?)',
@@ -163,6 +164,7 @@ def test_empty_bag(tmp_path: Path) -> None:
         assert not list(reader.messages())
         assert reader.custom_data['key1'] == 'value1'
         assert reader.custom_data['key2'] == 'value2'
+        assert reader.ros_distro == 'rosbags'
 
 
 def test_reader(bag: Path) -> None:

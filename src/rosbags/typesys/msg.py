@@ -371,6 +371,7 @@ def gendefhash(
     typename: str,
     subdefs: dict[str, tuple[str, str]],
     typestore: Typestore = types,
+    ros_version: int = 1,
 ) -> tuple[str, str]:
     """Generate message definition and hash for type.
 
@@ -380,6 +381,7 @@ def gendefhash(
         typename: Name of type to generate definition for.
         subdefs: Child definitions.
         typestore: Custom type store.
+        ros_version: ROS version number.
 
     Returns:
         Message definition and hash.
@@ -391,10 +393,11 @@ def gendefhash(
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
+
     typemap = {
         'builtin_interfaces/msg/Time': 'time',
         'builtin_interfaces/msg/Duration': 'duration',
-    }
+    } if ros_version == 1 else {}
 
     deftext: list[str] = []
     hashtext: list[str] = []
@@ -431,7 +434,7 @@ def gendefhash(
             else:
                 if subname not in subdefs:
                     subdefs[subname] = ('', '')
-                    subdefs[subname] = gendefhash(subname, subdefs, typestore)
+                    subdefs[subname] = gendefhash(subname, subdefs, typestore, ros_version)
                 deftext.append(f'{denormalize_msgtype(subname)} {name}')
                 hashtext.append(f'{subdefs[subname][1]} {name}')
         else:
@@ -458,11 +461,11 @@ def gendefhash(
                 assert isinstance(isubname, str)
                 if isubname not in subdefs:
                     subdefs[isubname] = ('', '')
-                    subdefs[isubname] = gendefhash(isubname, subdefs, typestore)
+                    subdefs[isubname] = gendefhash(isubname, subdefs, typestore, ros_version)
                 deftext.append(f'{denormalize_msgtype(isubname)}[{count}] {name}')
                 hashtext.append(f'{subdefs[isubname][1]} {name}')
 
-    if typename == 'std_msgs/msg/Header':
+    if ros_version == 1 and typename == 'std_msgs/msg/Header':
         deftext.insert(0, 'uint32 seq')
         hashtext.insert(0, 'uint32 seq')
 
@@ -470,19 +473,24 @@ def gendefhash(
     return '\n'.join(deftext), md5('\n'.join(hashtext).encode()).hexdigest()
 
 
-def generate_msgdef(typename: str, typestore: Typestore = types) -> tuple[str, str]:
+def generate_msgdef(
+    typename: str,
+    typestore: Typestore = types,
+    ros_version: int = 1,
+) -> tuple[str, str]:
     """Generate message definition for type.
 
     Args:
         typename: Name of type to generate definition for.
         typestore: Custom type store.
+        ros_version: ROS version number.
 
     Returns:
         Message definition.
 
     """
     subdefs: dict[str, tuple[str, str]] = {}
-    msgdef, md5sum = gendefhash(typename, subdefs, typestore)
+    msgdef, md5sum = gendefhash(typename, subdefs, typestore, ros_version)
 
     msgdef = ''.join(
         [

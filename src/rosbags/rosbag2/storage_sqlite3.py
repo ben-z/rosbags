@@ -7,6 +7,9 @@ from __future__ import annotations
 import sqlite3
 from typing import TYPE_CHECKING
 
+from rosbags.typesys.base import hash_rihs01
+from rosbags.typesys.msg import get_types_from_msg
+
 from .errors import ReaderError
 
 if TYPE_CHECKING:
@@ -31,24 +34,78 @@ class ReaderSqlite3:
             connections: List of connections.
 
         """
-        self.opened = False
         self.paths = paths
+        self.dbconns: list[sqlite3.Connection] = []
+        self.schema = 0
+        self.msgtypes: list[dict[str, str]] = []
         self.connections = connections
 
     def open(self) -> None:
         """Open rosbag2."""
-        self.opened = True
+        for path in self.paths:
+            conn = sqlite3.connect(f'file:{path}?immutable=1', uri=True)
+            conn.row_factory = lambda _, x: x
+            cur = conn.cursor()
+            cur.execute(
+                'SELECT count(*) FROM sqlite_master '
+                'WHERE type="table" AND name IN ("messages", "topics")',
+            )
+            if cur.fetchone()[0] != 2:
+                raise ReaderError(f'Cannot open database {path} or database missing tables.')
+
+            self.dbconns.append(conn)
+
+        cur = self.dbconns[-1].cursor()
+        if cur.execute('PRAGMA table_info(schema)').fetchall():
+            schema, = cur.execute('SELECT schema_version FROM schema').fetchone()
+        elif any(x[1] == 'offered_qos_profiles' for x in cur.execute('PRAGMA table_info(topics)')):
+            schema = 2
+        else:
+            schema = 1
+
+        if schema >= 4:
+            msgtypes = [
+                {
+                    'name': x[0],
+                    'encoding': x[1],
+                    'msgdef': x[2],
+                    'digest': x[3],
+                } for x in cur.execute(
+                    'SELECT topic_type, encoding, encoded_message_definition, type_description_hash'
+                    ' FROM message_definitions ORDER BY id',
+                )
+            ]
+            for typ in msgtypes:
+                assert typ['encoding'] == 'ros2msg'
+                types = get_types_from_msg(typ['msgdef'], typ['name'])
+
+                class Store:  # pylint: disable=too-few-public-methods
+                    FIELDDEFS = types
+
+                assert typ['digest'] == hash_rihs01(
+                    typ['name'],
+                    Store,
+                ), f'Failed to parse {typ["name"]}'
+        else:
+            msgtypes = []
+
+        self.schema = schema
+        self.msgtypes = msgtypes
 
     def close(self) -> None:
         """Close rosbag2."""
-        assert self.opened
-        self.opened = False
+        assert self.dbconns
+        for dbconn in self.dbconns:
+            dbconn.close()
+        self.dbconns.clear()
 
     def get_definitions(self) -> dict[str, tuple[str, str]]:
         """Get message definitions."""
-        return {}
+        if not self.dbconns:
+            raise ReaderError('Rosbag has not been opened.')
+        return {x['name']: (x['encoding'][4:], x['msgdef']) for x in self.msgtypes}
 
-    def messages(  # pylint: disable=too-many-locals
+    def messages(
         self,
         connections: Iterable[Connection] = (),
         start: Optional[int] = None,
@@ -69,6 +126,9 @@ class ReaderSqlite3:
             ReaderError: Bag not open.
 
         """
+        if not self.dbconns:
+            raise ReaderError('Rosbag has not been opened.')
+
         query = [
             'SELECT topics.id,messages.timestamp,messages.data',
             'FROM messages JOIN topics ON messages.topic_id=topics.id',
@@ -95,17 +155,8 @@ class ReaderSqlite3:
         query.append('ORDER BY timestamp')
         querystr = ' '.join(query)
 
-        for path in self.paths:
-            conn = sqlite3.connect(f'file:{path}?immutable=1', uri=True)
-            conn.row_factory = lambda _, x: x
+        for conn in self.dbconns:
             cur = conn.cursor()
-            cur.execute(
-                'SELECT count(*) FROM sqlite_master '
-                'WHERE type="table" AND name IN ("messages", "topics")',
-            )
-            if cur.fetchone()[0] != 2:
-                raise ReaderError(f'Cannot open database {path} or database missing tables.')
-
             cur.execute('SELECT name,id FROM topics')
             connmap: dict[int, Connection] = {
                 row[1]: next((x for x in self.connections if x.topic == row[0]),

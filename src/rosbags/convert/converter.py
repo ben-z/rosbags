@@ -21,7 +21,7 @@ from rosbags.typesys.msg import generate_msgdef
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from typing import Any, Optional, Sequence
+    from typing import Optional, Sequence
 
 LATCH = """
 - history: 3
@@ -118,7 +118,6 @@ def convert_1to2(
 
     """
     with Reader1(src) as reader, Writer2(dst) as writer:
-        typs: dict[str, Any] = {}
         connmap: dict[int, Connection] = {}
         connections = [
             x for x in reader.connections
@@ -137,15 +136,15 @@ def convert_1to2(
                 ):
                     break
             else:
+                typs = get_types_from_msg(rconn.msgdef, rconn.msgtype)
+                register_types(typs)
                 conn = writer.add_connection(
                     candidate.topic,
                     candidate.msgtype,
-                    candidate.ext.serialization_format,
-                    candidate.ext.offered_qos_profiles,
+                    serialization_format=candidate.ext.serialization_format,
+                    offered_qos_profiles=candidate.ext.offered_qos_profiles,
                 )
             connmap[rconn.id] = conn
-            typs.update(get_types_from_msg(rconn.msgdef, rconn.msgtype))
-        register_types(typs)
 
         for rconn, timestamp, data in reader.messages(connections=connections):
             data = ros1_to_cdr(data, rconn.msgtype)

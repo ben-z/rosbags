@@ -13,10 +13,12 @@ import zstandard
 from ruamel.yaml import YAML
 
 from rosbags.interfaces import Connection, ConnectionExtRosbag2
+from rosbags.typesys.base import hash_rihs01
+from rosbags.typesys.msg import generate_msgdef, get_types_from_msg
 
 if TYPE_CHECKING:
     from types import TracebackType
-    from typing import Any, Literal, Optional, Type, Union
+    from typing import Literal, Optional, Type, Union
 
     from .metadata import Metadata
 
@@ -28,18 +30,35 @@ class WriterError(Exception):
 class Writer:  # pylint: disable=too-many-instance-attributes
     """Rosbag2 writer.
 
-    This class implements writing of rosbag2 files in version 4. It should be
+    This class implements writing of rosbag2 files in version 8. It should be
     used as a contextmanager.
 
     """
 
     SQLITE_SCHEMA = """
+    CREATE TABLE schema(
+      schema_version INTEGER PRIMARY KEY,
+      ros_distro TEXT NOT NULL
+    );
+    CREATE TABLE metadata(
+      id INTEGER PRIMARY KEY,
+      metadata_version INTEGER NOT NULL,
+      metadata TEXT NOT NULL
+    );
     CREATE TABLE topics(
       id INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
       type TEXT NOT NULL,
       serialization_format TEXT NOT NULL,
-      offered_qos_profiles TEXT NOT NULL
+      offered_qos_profiles TEXT NOT NULL,
+      type_description_hash TEXT NOT NULL
+    );
+    CREATE TABLE message_definitions(
+      id INTEGER PRIMARY KEY,
+      topic_type TEXT NOT NULL,
+      encoding TEXT NOT NULL,
+      encoded_message_definition TEXT NOT NULL,
+      type_description_hash TEXT NOT NULL
     );
     CREATE TABLE messages(
       id INTEGER PRIMARY KEY,
@@ -48,6 +67,7 @@ class Writer:  # pylint: disable=too-many-instance-attributes
       data BLOB NOT NULL
     );
     CREATE INDEX timestamp_idx ON messages (timestamp ASC);
+    INSERT INTO schema(schema_version, ros_distro) VALUES (4, 'rosbags');
     """
 
     class CompressionMode(IntEnum):
@@ -86,6 +106,7 @@ class Writer:  # pylint: disable=too-many-instance-attributes
         self.conn: Optional[sqlite3.Connection] = None
         self.cursor: Optional[sqlite3.Cursor] = None
         self.custom_data: dict[str, str] = {}
+        self.added_types: list[str] = []
 
     def set_compression(self, mode: CompressionMode, fmt: CompressionFormat) -> None:
         """Enable compression on bag.
@@ -142,6 +163,9 @@ class Writer:  # pylint: disable=too-many-instance-attributes
         self,
         topic: str,
         msgtype: str,
+        *,
+        msgdef: Optional[str] = None,
+        rihs01: Optional[str] = None,
         serialization_format: str = 'cdr',
         offered_qos_profiles: str = '',
     ) -> Connection:
@@ -152,6 +176,8 @@ class Writer:  # pylint: disable=too-many-instance-attributes
         Args:
             topic: Topic name.
             msgtype: Message type.
+            msgdef: Message definiton.
+            rihs01: Message hash.
             serialization_format: Serialization format.
             offered_qos_profiles: QOS Profile.
 
@@ -165,12 +191,31 @@ class Writer:  # pylint: disable=too-many-instance-attributes
         if not self.cursor:
             raise WriterError('Bag was not opened.')
 
+        if msgdef is None or rihs01 is None:
+            msgdef, _ = generate_msgdef(msgtype, ros_version=2)
+            types = get_types_from_msg(msgdef, msgtype)
+
+            class Store:  # pylint: disable=too-few-public-methods
+                FIELDDEFS = types
+
+            rihs01 = hash_rihs01(msgtype, Store)
+        assert msgdef
+        assert rihs01
+
+        if msgtype not in self.added_types:
+            self.cursor.execute(
+                'INSERT INTO message_definitions (topic_type, encoding, encoded_message_definition,'
+                ' type_description_hash) VALUES(?, ?, ?, ?)',
+                (msgtype, 'ros2msg', msgdef, rihs01),
+            )
+            self.added_types.append(msgtype)
+
         connection = Connection(
             id=len(self.connections) + 1,
             topic=topic,
             msgtype=msgtype,
-            msgdef='',
-            digest='',
+            msgdef=msgdef,
+            digest=rihs01,
             msgcount=0,
             ext=ConnectionExtRosbag2(
                 serialization_format=serialization_format,
@@ -187,8 +232,8 @@ class Writer:  # pylint: disable=too-many-instance-attributes
 
         self.connections.append(connection)
         self.counts[connection.id] = 0
-        meta = (connection.id, topic, msgtype, serialization_format, offered_qos_profiles)
-        self.cursor.execute('INSERT INTO topics VALUES(?, ?, ?, ?, ?)', meta)
+        meta = (connection.id, topic, msgtype, serialization_format, offered_qos_profiles, '')
+        self.cursor.execute('INSERT INTO topics VALUES(?, ?, ?, ?, ?, ?)', meta)
         return connection
 
     def write(self, connection: Connection, timestamp: int, data: bytes) -> None:
@@ -247,7 +292,7 @@ class Writer:  # pylint: disable=too-many-instance-attributes
 
         metadata: dict[str, Metadata] = {
             'rosbag2_bagfile_information': {
-                'version': 6,
+                'version': 8,
                 'storage_identifier': 'sqlite3',
                 'relative_file_paths': [self.dbpath.name],
                 'duration': {
@@ -264,6 +309,7 @@ class Writer:  # pylint: disable=too-many-instance-attributes
                             'type': x.msgtype,
                             'serialization_format': x.ext.serialization_format,
                             'offered_qos_profiles': x.ext.offered_qos_profiles,
+                            'type_description_hash': x.digest,
                         },
                         'message_count': self.counts[x.id],
                     } for x in self.connections if isinstance(x.ext, ConnectionExtRosbag2)
@@ -283,6 +329,7 @@ class Writer:  # pylint: disable=too-many-instance-attributes
                     },
                 ],
                 'custom_data': self.custom_data,
+                'ros_distro': 'rosbags',
             },
         }
         with self.metapath.open('w') as metafile:

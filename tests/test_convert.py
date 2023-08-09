@@ -195,7 +195,7 @@ def test_convert_1to2(tmp_path: Path) -> None:
 
         writerinst.connections = []
 
-        def add_connection(*_: Any) -> Connection:  # noqa: ANN401
+        def add_connection(*_1: Any, **_2: Any) -> Connection:  # noqa: ANN401
             """Mock for Writer.add_connection."""
             writerinst.connections = [
                 conn for _, conn in zip(range(len(writerinst.connections) + 1), wconnections)
@@ -214,9 +214,9 @@ def test_convert_1to2(tmp_path: Path) -> None:
         writer.assert_called_with(Path('foo'))
         writerinst.add_connection.assert_has_calls(
             [
-                call('/topic', 'typ', 'cdr', ''),
-                call('/topic', 'typ', 'cdr', LATCH),
-                call('/other', 'typ', 'cdr', ''),
+                call('/topic', 'typ', serialization_format='cdr', offered_qos_profiles=''),
+                call('/topic', 'typ', serialization_format='cdr', offered_qos_profiles=LATCH),
+                call('/other', 'typ', serialization_format='cdr', offered_qos_profiles=''),
             ],
         )
         writerinst.write.assert_has_calls(
