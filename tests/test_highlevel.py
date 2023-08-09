@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from contextlib import AbstractContextManager, nullcontext
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
@@ -143,8 +144,10 @@ def test_anyreader1(bags1: Sequence[Path]) -> None:  # pylint: disable=redefined
             next(gen)
 
 
-def test_anyreader2(bags2: list[Path]) -> None:  # pylint: disable=redefined-outer-name
+@pytest.mark.parametrize('strip_types', [False, True])
+def test_anyreader2(bags2: list[Path], strip_types: bool) -> None:
     """Test AnyReader on rosbag2."""
+    # pylint: disable=redefined-outer-name
     # pylint: disable=too-many-statements
     with pytest.raises(AnyReaderError, match='multiple rosbag2'):
         AnyReader(bags2)
@@ -152,7 +155,11 @@ def test_anyreader2(bags2: list[Path]) -> None:  # pylint: disable=redefined-out
     with pytest.raises(AnyReaderError, match='YAML'):
         AnyReader([bags2[1]])
 
-    with AnyReader([bags2[0]]) as reader:
+    ctx: AbstractContextManager[None] = patch(  # type: ignore[assignment]
+        'rosbags.rosbag2.storage_sqlite3.ReaderSqlite3.get_definitions',
+        return_value={},
+    ) if strip_types else nullcontext()
+    with ctx, AnyReader([bags2[0]]) as reader:
         assert reader.duration == 15
         assert reader.start_time == 1
         assert reader.end_time == 16

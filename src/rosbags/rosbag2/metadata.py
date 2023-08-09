@@ -26,6 +26,7 @@ class TopicMetadata(TypedDict):
     type: str
     serialization_format: str
     offered_qos_profiles: str
+    type_description_hash: str
 
 
 class TopicWithMessageCount(TypedDict):
@@ -58,3 +59,4 @@ class Metadata(TypedDict):
     topics_with_message_count: list[TopicWithMessageCount]
     files: list[FileInformation]
     custom_data: dict[str, str]
+    ros_distro: str

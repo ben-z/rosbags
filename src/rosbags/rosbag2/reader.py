@@ -65,9 +65,11 @@ class Reader:
         - Version 1: Initial format.
         - Version 2: Changed field sizes in C++ implementation.
         - Version 3: Added compression.
-        - Version 4: Added QoS metadata to topics, changed relative file paths
-        - Version 5: Added per file metadata
-        - Version 6: Added custom_data dict to metadata
+        - Version 4: Added QoS metadata to topics, changed relative file paths.
+        - Version 5: Added per file metadata.
+        - Version 6: Added custom_data dict to metadata.
+        - Version 7: Added type_description_hash to topic metadata.
+        - Version 8: Added ros_distro to metadata.
 
     """
 
@@ -101,7 +103,7 @@ class Reader:
 
         try:
             self.metadata: Metadata = dct['rosbag2_bagfile_information']
-            if (ver := self.metadata['version']) > 6:
+            if (ver := self.metadata['version']) > 8:
                 raise ReaderError(f'Rosbag2 version {ver} not supported; please report issue.')
             if (storageid := self.metadata['storage_identifier']) not in self.STORAGE_PLUGINS:
                 raise ReaderError(
@@ -118,7 +120,7 @@ class Reader:
                     topic=x['topic_metadata']['name'],
                     msgtype=x['topic_metadata']['type'],
                     msgdef='',
-                    digest='',
+                    digest=x['topic_metadata'].get('type_description_hash', ''),
                     msgcount=x['message_count'],
                     ext=ConnectionExtRosbag2(
                         serialization_format=x['topic_metadata']['serialization_format'],
@@ -182,6 +184,11 @@ class Reader:
     def topics(self) -> dict[str, TopicInfo]:
         """Topic information."""
         return {x.topic: TopicInfo(x.msgtype, x.msgdef, x.msgcount, [x]) for x in self.connections}
+
+    @property
+    def ros_distro(self) -> Optional[str]:
+        """ROS distribution."""
+        return self.metadata.get('ros_distro')
 
     def open(self) -> None:
         """Open rosbag2."""

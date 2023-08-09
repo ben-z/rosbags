@@ -138,7 +138,7 @@ class AnyReader:
         if self.is2:
             reader = self.readers[0]
             assert isinstance(reader, Reader2)
-            if reader.metadata['storage_identifier'] == 'mcap':
+            if reader.connections and reader.connections[0].msgdef:
                 for connection in reader.connections:
                     if connection.digest:
                         if connection.digest == 'idl':
