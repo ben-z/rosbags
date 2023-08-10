@@ -104,7 +104,13 @@ def generate_python_code(typs: Typesdict) -> str:
             f'class {pyname}:',
             f'    """Class for {name}."""',
             '',
-            *[f'    {fname}: {get_typehint(desc)}' for fname, desc in fields],
+            *[
+                (
+                    f'    {fname}: {get_typehint(desc)}'
+                    f'{" = 0" if fname == "structure_needs_at_least_one_member" else ""}'
+                ) for fname, desc in fields or
+                [('structure_needs_at_least_one_member', (1, 'uint8'))]
+            ],
             *[
                 f'    {fname}: ClassVar[{get_typehint((1, ftype))}] = {fvalue!r}'
                 for fname, ftype, fvalue in consts
@@ -138,7 +144,10 @@ def generate_python_code(typs: Typesdict) -> str:
                 ] if consts else ['        [],']
             ),
             '        [',
-            *[f'            ({fname!r}, {get_ftype(ftype)!r}),' for fname, ftype in fields],
+            *[
+                f'            ({fname!r}, {get_ftype(ftype)!r}),' for fname, ftype in fields or
+                [('structure_needs_at_least_one_member', (1, 'uint8'))]
+            ],
             '        ],',
             '    ),',
         ]
