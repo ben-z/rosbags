@@ -60,9 +60,13 @@ def generate_ros1_to_cdr(
         lines.append('  ipos += 4')
 
     for fcurr, fnext in zip(icurr, inext):
-        _, desc = fcurr
+        fieldname, desc = fcurr
 
-        if desc.valtype == Valtype.MESSAGE:
+        if fieldname == 'structure_needs_at_least_one_member':
+            lines.append('  opos += 1')
+            aligned = 1
+
+        elif desc.valtype == Valtype.MESSAGE:
             lines.append(f'  func = get_msgdef("{desc.args.name}", typestore).{funcname}')
             lines.append('  ipos, opos = func(input, ipos, output, opos, typestore)')
             aligned = align_after(desc)
@@ -216,9 +220,13 @@ def generate_cdr_to_ros1(
         lines.append('  opos += 4')
 
     for fcurr, fnext in zip(icurr, inext):
-        _, desc = fcurr
+        fieldname, desc = fcurr
 
-        if desc.valtype == Valtype.MESSAGE:
+        if fieldname == 'structure_needs_at_least_one_member':
+            lines.append('  ipos += 1')
+            aligned = 1
+
+        elif desc.valtype == Valtype.MESSAGE:
             lines.append(f'  func = get_msgdef("{desc.args.name}", typestore).{funcname}')
             lines.append('  ipos, opos = func(input, ipos, output, opos, typestore)')
             aligned = align_after(desc)
@@ -361,6 +369,9 @@ def generate_getsize_ros1(fields: list[Field], typename: str) -> tuple[CDRSerSiz
     for fcurr in fields:
         fieldname, desc = fcurr
 
+        if fieldname == 'structure_needs_at_least_one_member':
+            continue
+
         if desc.valtype == Valtype.MESSAGE:
             if desc.args.size_ros1:
                 lines.append(f'  pos += {desc.args.size_ros1}')
@@ -472,6 +483,9 @@ def generate_serialize_ros1(fields: list[Field], typename: str) -> CDRSer:
 
     for fcurr in fields:
         fieldname, desc = fcurr
+
+        if fieldname == 'structure_needs_at_least_one_member':
+            continue
 
         lines.append(f'  val = message.{fieldname}')
         if desc.valtype == Valtype.MESSAGE:
@@ -589,7 +603,10 @@ def generate_deserialize_ros1(fields: list[Field], typename: str) -> CDRDeser:
     funcname = 'deserialize_ros1'
     lines.append('  values = []')
     for fcurr in fields:
-        desc = fcurr[1]
+        fieldname, desc = fcurr
+
+        if fieldname == 'structure_needs_at_least_one_member':
+            continue
 
         if desc.valtype == Valtype.MESSAGE:
             lines.append(f'  msgdef = get_msgdef("{desc.args.name}", typestore)')
