@@ -3,6 +3,24 @@
 Changes
 =======
 
+0.9.16 - 2023-08-11
+-------------------
+
+- Support rosbag2 up to version 8 `#59`_
+- Implement RIHS01 hashing of types
+- Fix chunk size bug in rosbag1 writer `#58`_
+- Fix handling of empty messages `#56`_
+- Allow empty bags, chunks, and connections
+- Avoid field name collisions with python keywords `#51`_
+- Improve msg/idl type matching
+- Improve some examples
+
+.. _#51: https://gitlab.com/ternaris/rosbags/issues/51
+.. _#56: https://gitlab.com/ternaris/rosbags/issues/56
+.. _#58: https://gitlab.com/ternaris/rosbags/issues/58
+.. _#59: https://gitlab.com/ternaris/rosbags/issues/59
+
+
 0.9.15 - 2023-03-02
 -------------------
 - Refactor rosbag2 Reader for multipe storage backends
