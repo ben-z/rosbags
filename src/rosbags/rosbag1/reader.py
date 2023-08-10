@@ -416,8 +416,7 @@ class Reader:
                 for _ in range(len(chunk_info.connection_counts)):
                     self.read_index_data(chunk_info.pos, indexes)
 
-            self.indexes = {cid: sorted(x) for cid, x in indexes.items()}
-            assert all(self.indexes[x.id] for x in self.connections)
+            self.indexes = {x.id: sorted(indexes[x.id]) for x in self.connections}
 
             self.connections = [
                 Connection(
@@ -439,7 +438,8 @@ class Reader:
     @property
     def duration(self) -> int:
         """Duration in nanoseconds between earliest and latest messages."""
-        return self.end_time - self.start_time if self.chunk_infos else 0
+        duration = self.end_time - self.start_time
+        return max(duration, 0)
 
     @property
     def start_time(self) -> int:
@@ -517,9 +517,9 @@ class Reader:
             raise ReaderError(f'CHUNK_INFO version {ver} is not supported.')
 
         chunk_pos = header.get_uint64('chunk_pos')
-        start_time = header.get_time('start_time')
-        end_time = header.get_time('end_time') + 1
         count = header.get_uint32('count')
+        start_time = header.get_time('start_time') if count else 2**63 - 1
+        end_time = header.get_time('end_time') + 1 if count else 0
 
         self.bio.seek(4, os.SEEK_CUR)
 
