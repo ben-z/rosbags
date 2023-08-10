@@ -214,7 +214,6 @@ class Writer:
         md5sum: Optional[str] = None,
         callerid: Optional[str] = None,
         latching: Optional[int] = None,
-        **_kw: Any,  # noqa: ANN401
     ) -> Connection:
         """Add a connection.
 
@@ -227,7 +226,6 @@ class Writer:
             md5sum: Message hash.
             callerid: Caller id.
             latching: Latching information.
-            _kw: Ignored to allow consuming dicts from connection objects.
 
         Returns:
             Connection id.
