@@ -407,6 +407,8 @@ def gendefhash(
         hashtext.append(f'{typ} {name}={value}')
 
     for name, desc in typestore.FIELDDEFS[typename][1]:
+        if name == 'structure_needs_at_least_one_member':
+            continue
         name = name.rstrip('_')
         if desc[0] == int(Nodetype.BASE):
             args = desc[1]

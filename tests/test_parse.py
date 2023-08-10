@@ -363,6 +363,9 @@ def test_register_types() -> None:
 
 def test_generate_msgdef() -> None:
     """Test message definition generator."""
+    res = generate_msgdef('std_msgs/msg/Empty')
+    assert res == ('', 'd41d8cd98f00b204e9800998ecf8427e')
+
     res = generate_msgdef('std_msgs/msg/Header')
     assert res == ('uint32 seq\ntime stamp\nstring frame_id\n', '2176decaecbce78abc3b96ef049fabed')
 
