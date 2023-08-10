@@ -193,6 +193,22 @@ su64_u64[] seq
 uint64 u64
 """
 
+EMPTY_MSG = """
+uint8 JUST_SOME_CONSTANT = 1
+"""
+
+EMPTY_UNALIGNED_HOLDER = """
+int32 pre
+test_msgs/msg/Empty empty
+int64 post
+"""
+
+EMPTY_ALIGNED_HOLDER = """
+int64 pre
+test_msgs/msg/Empty empty
+int64 post
+"""
+
 
 @pytest.fixture()
 def _comparable() -> Generator[None, None, None]:
@@ -511,3 +527,51 @@ def test_align_after_empty_sequence() -> None:
 
     assert deserialize_cdr(cdr, msg1.__msgtype__) == msg1
     assert deserialize_cdr(cdr, msg2.__msgtype__) == msg2
+
+
+def test_empty_message_handling() -> None:
+    """Test empty message handling."""
+    register_types(dict(get_types_from_msg(EMPTY_MSG, 'test_msgs/msg/Empty')))
+    register_types(
+        dict(get_types_from_msg(EMPTY_UNALIGNED_HOLDER, 'test_msgs/msg/UnalignedHolder')),
+    )
+    register_types(dict(get_types_from_msg(EMPTY_ALIGNED_HOLDER, 'test_msgs/msg/AlignedHolder')))
+
+    empty = get_msgdef('test_msgs/msg/Empty', types).cls
+    unaligned_holder = get_msgdef('test_msgs/msg/UnalignedHolder', types).cls
+    aligned_holder = get_msgdef('test_msgs/msg/AlignedHolder', types).cls
+
+    unaligned_msg = unaligned_holder(-1, empty(), -1)
+    aligned_msg = aligned_holder(-1, empty(), -1)
+
+    unaligned_cdr_bytes = (
+        b'\x00\x01\x00\x00'
+        b'\xff\xff\xff\xff'
+        b'\x00\x00\x00\x00'
+        b'\xff\xff\xff\xff\xff\xff\xff\xff'
+    )
+    aligned_cdr_bytes = (
+        b'\x00\x01\x00\x00'
+        b'\xff\xff\xff\xff\xff\xff\xff\xff'
+        b'\x00\x00\x00\x00\x00\x00\x00\x00'
+        b'\xff\xff\xff\xff\xff\xff\xff\xff'
+    )
+    unaligned_ros1_bytes = (b'\xff\xff\xff\xff'
+                            b'\xff\xff\xff\xff\xff\xff\xff\xff')
+    aligned_ros1_bytes = (b'\xff\xff\xff\xff\xff\xff\xff\xff'
+                          b'\xff\xff\xff\xff\xff\xff\xff\xff')
+
+    assert serialize_cdr(unaligned_msg, unaligned_msg.__msgtype__) == unaligned_cdr_bytes
+    assert serialize_cdr(aligned_msg, aligned_msg.__msgtype__) == aligned_cdr_bytes
+    assert serialize_ros1(unaligned_msg, unaligned_msg.__msgtype__) == unaligned_ros1_bytes
+    assert serialize_ros1(aligned_msg, aligned_msg.__msgtype__) == aligned_ros1_bytes
+
+    assert deserialize_cdr(unaligned_cdr_bytes, unaligned_msg.__msgtype__) == unaligned_msg
+    assert deserialize_cdr(aligned_cdr_bytes, aligned_msg.__msgtype__) == aligned_msg
+    assert deserialize_ros1(unaligned_ros1_bytes, unaligned_msg.__msgtype__) == unaligned_msg
+    assert deserialize_ros1(aligned_ros1_bytes, aligned_msg.__msgtype__) == aligned_msg
+
+    assert cdr_to_ros1(unaligned_cdr_bytes, unaligned_msg.__msgtype__) == unaligned_ros1_bytes
+    assert cdr_to_ros1(aligned_cdr_bytes, aligned_msg.__msgtype__) == aligned_ros1_bytes
+    assert ros1_to_cdr(unaligned_ros1_bytes, unaligned_msg.__msgtype__) == unaligned_cdr_bytes
+    assert ros1_to_cdr(aligned_ros1_bytes, aligned_msg.__msgtype__) == aligned_cdr_bytes
