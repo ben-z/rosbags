@@ -144,7 +144,6 @@ class Writer:  # pylint: disable=too-many-instance-attributes
         msgtype: str,
         serialization_format: str = 'cdr',
         offered_qos_profiles: str = '',
-        **_kw: Any,  # noqa: ANN401
     ) -> Connection:
         """Add a connection.
 
@@ -155,7 +154,6 @@ class Writer:  # pylint: disable=too-many-instance-attributes
             msgtype: Message type.
             serialization_format: Serialization format.
             offered_qos_profiles: QOS Profile.
-            _kw: Ignored to allow consuming dicts from connection objects.
 
         Returns:
             Connection object.
