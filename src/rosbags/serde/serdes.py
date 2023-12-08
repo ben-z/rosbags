@@ -33,6 +33,9 @@ def deserialize_cdr(
     Returns:
         Deserialized message object.
 
+    Raises:
+        UnicodeDecodeError: If the message cannot be decoded.
+
     """
     little_endian = bool(rawdata[1])
 
@@ -40,9 +43,11 @@ def deserialize_cdr(
     func = msgdef.deserialize_cdr_le if little_endian else msgdef.deserialize_cdr_be
     try:
         message, pos = func(rawdata[4:], 0, msgdef.cls, typestore)
-    except UnicodeDecodeError as e:
-        e.reason += f' do you have an unterminated string field in `{typename}`? This is unsupported by this library. Change the type definition to `char[n]` instead.'
-        raise e
+    except UnicodeDecodeError as err:
+        err.reason += f' do you have an unterminated string field in `{typename}`?' \
+            + ' This is unsupported by this library.' \
+            + ' Change the type definition to `char[n]` instead.'
+        raise err
     assert pos + 4 + 3 + 1 >= len(rawdata)
     return message
 
@@ -98,8 +103,10 @@ def deserialize_ros1(
     message, pos = func(rawdata, 0, msgdef.cls, typestore)
 
     # Allow for 1 byte of data to be left unread This happens with ROS 1 Imu messages.
-    # TODO: figure out why sometimes we are reading 1 byte less than expected
-    assert pos == len(rawdata) or pos == len(rawdata)-1, f'ERROR: {typename} deserialization did not consume all bytes. {pos=} != {len(rawdata)=}. deserialized_size={pos}'
+    # TODO: figure out why sometimes we are reading 1 byte less than expected # noqa: T101
+    assert pos == len(rawdata) or pos == len(rawdata) - 1, \
+        f'ERROR: {typename} deserialization did not consume all bytes.' \
+        + ' {pos=} != {len(rawdata)=}. deserialized_size={pos}'
 
     return message
 
