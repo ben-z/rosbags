@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python environment and run tests
+        run: |
+          python3.8 -m venv venv
+          venv/bin/python -m pip install -r requirements-dev.txt
+          venv/bin/python -m pip install -e .[dev]
+          venv/bin/pytest --cov-report=term --cov-report=xml --junit-xml=report.xml
+          venv/bin/flake8 src tests
+          venv/bin/mypy --no-error-summary src tests
+          venv/bin/pylint --jobs 0 --score n src tests
+          venv/bin/yapf -dpr src tests
+          venv/bin/sphinx-build docs public
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: coverage.xml
+      - name: Upload JUnit report
+        uses: actions/upload-artifact@v2
+        with:
+          name: junit-report
+          path: report.xml
+
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the project
+        run: |
+          python3.8 -m venv venv
+          venv/bin/python -m pip install build
+          venv/bin/python -m build .
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: dist
+
+  pages:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.8
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - name: List public directory
+        run: ls public
+      - name: Upload pages content
+        uses: actions/upload-artifact@v2
+        with:
+          name: pages-content
+          path: public
