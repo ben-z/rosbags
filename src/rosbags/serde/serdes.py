@@ -38,7 +38,11 @@ def deserialize_cdr(
 
     msgdef = get_msgdef(typename, typestore)
     func = msgdef.deserialize_cdr_le if little_endian else msgdef.deserialize_cdr_be
-    message, pos = func(rawdata[4:], 0, msgdef.cls, typestore)
+    try:
+        message, pos = func(rawdata[4:], 0, msgdef.cls, typestore)
+    except UnicodeDecodeError as e:
+        e.reason += f' do you have an unterminated string field in `{typename}`? This is unsupported by this library. Change the type definition to `char[n]` instead.'
+        raise e
     assert pos + 4 + 3 + 1 >= len(rawdata)
     return message
 
