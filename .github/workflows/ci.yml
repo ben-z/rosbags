@@ -28,7 +28,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          python3 -m venv venv
+          python --version # for debugging
+          python -m venv venv
           venv/bin/python -m pip install -r requirements-dev.txt
           venv/bin/python -m pip install -e .[dev]
       - run: venv/bin/pytest --cov-report=term --cov-report=xml --junit-xml=report.xml
