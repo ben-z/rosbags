@@ -22,17 +22,21 @@ jobs:
           - 3.12
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python environment
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
         run: |
           python3 -m venv venv
           venv/bin/python -m pip install -r requirements-dev.txt
           venv/bin/python -m pip install -e .[dev]
-          venv/bin/sphinx-build docs public
       - run: venv/bin/pytest --cov-report=term --cov-report=xml --junit-xml=report.xml
       - run: venv/bin/flake8 src tests
       - run: venv/bin/mypy --no-error-summary src tests
       - run: venv/bin/pylint --jobs 0 --score n src tests
       - run: venv/bin/yapf -dpr src tests
+      - run: venv/bin/sphinx-build docs public
       - name: Upload coverage report
         uses: actions/upload-artifact@v3
         with:
