@@ -15,17 +15,17 @@ jobs:
       image: python:3.8
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python environment and run tests
+      - name: Set up Python environment
         run: |
           python3.8 -m venv venv
           venv/bin/python -m pip install -r requirements-dev.txt
           venv/bin/python -m pip install -e .[dev]
-          venv/bin/pytest --cov-report=term --cov-report=xml --junit-xml=report.xml
-          venv/bin/flake8 src tests
-          venv/bin/mypy --no-error-summary src tests
-          venv/bin/pylint --jobs 0 --score n src tests
-          venv/bin/yapf -dpr src tests
-          venv/bin/sphinx-build docs public
+      - run: venv/bin/pytest --cov-report=term --cov-report=xml --junit-xml=report.xml
+      - run: venv/bin/flake8 src tests
+      - run: venv/bin/mypy --no-error-summary src tests
+      - run: venv/bin/pylint --jobs 0 --score n src tests
+      - run: venv/bin/yapf -dpr src tests
+      - run: venv/bin/sphinx-build docs public
       - name: Upload coverage report
         uses: actions/upload-artifact@v2
         with:
