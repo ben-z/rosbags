@@ -32,7 +32,7 @@ def deserialize_cdr(
 
     Returns:
         Deserialized message object.
-    
+
     Raises:
         UnicodeDecodeError: If the message cannot be decoded.
 
