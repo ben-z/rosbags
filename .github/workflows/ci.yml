@@ -27,6 +27,7 @@ jobs:
           python3 -m venv venv
           venv/bin/python -m pip install -r requirements-dev.txt
           venv/bin/python -m pip install -e .[dev]
+          venv/bin/sphinx-build docs public
       - run: venv/bin/pytest --cov-report=term --cov-report=xml --junit-xml=report.xml
       - run: venv/bin/flake8 src tests
       - run: venv/bin/mypy --no-error-summary src tests
@@ -42,6 +43,11 @@ jobs:
         with:
           name: junit-report
           path: report.xml
+      - name: Upload pages content
+        uses: actions/upload-artifact@v3
+        with:
+          name: github-pages
+          path: public
 
   build:
     runs-on: ubuntu-latest
@@ -59,40 +65,3 @@ jobs:
         with:
           name: build-artifacts
           path: dist
-
-  build_docs:
-    runs-on: ubuntu-latest
-    container:
-      image: python:3.11
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build the docs
-        run: |
-          python3 -m venv venv
-          venv/bin/python -m pip install -r requirements-dev.txt
-          venv/bin/python -m pip install -e .[dev]
-          venv/bin/sphinx-build docs public
-      - name: Upload pages content
-        uses: actions/upload-artifact@v3
-        with:
-          name: pages-content
-          path: public
-  
-  deploy_docs:
-    if: github.ref == 'refs/heads/master'
-    needs:
-      - test
-      - build
-      - build_docs
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: pages-content
-          path: public
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
