@@ -53,16 +53,6 @@ jobs:
         with:
           name: build-artifacts
           path: dist
-
-  pages:
-    runs-on: ubuntu-latest
-    container:
-      image: python:3.8
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v4
-      - name: List public directory
-        run: ls public
       - name: Upload pages content
         uses: actions/upload-artifact@v2
         with:
