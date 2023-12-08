@@ -12,13 +12,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container:
-      image: python:3.8
+    strategy:
+      matrix:
+        python-version:
+          - 3.8
+          - 3.9
+          - 3.10
+          - 3.11
+          - 3.12
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python environment
         run: |
-          python3.8 -m venv venv
+          python3 -m venv venv
           venv/bin/python -m pip install -r requirements-dev.txt
           venv/bin/python -m pip install -e .[dev]
       - run: venv/bin/pytest --cov-report=term --cov-report=xml --junit-xml=report.xml
@@ -40,12 +46,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: python:3.8
+      image: python:3.11
     steps:
       - uses: actions/checkout@v4
       - name: Build the project
         run: |
-          python3.8 -m venv venv
+          python3 -m venv venv
           venv/bin/python -m pip install build
           venv/bin/python -m build .
       - name: Upload build artifacts
@@ -57,12 +63,12 @@ jobs:
   build_docs:
     runs-on: ubuntu-latest
     container:
-      image: python:3.8
+      image: python:3.11
     steps:
       - uses: actions/checkout@v4
       - name: Build the docs
         run: |
-          python3.8 -m venv venv
+          python3 -m venv venv
           venv/bin/python -m pip install -r requirements-dev.txt
           venv/bin/python -m pip install -e .[dev]
           venv/bin/sphinx-build docs public
@@ -79,8 +85,6 @@ jobs:
       - build
       - build_docs
     runs-on: ubuntu-latest
-    container:
-      image: python:3.8
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
